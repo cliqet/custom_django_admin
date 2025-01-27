@@ -5,6 +5,9 @@
  to have the default Django admin that we have gotten used to but make it more flexible on 
  the frontend side.
 
+### Frontend for Custom Django Admin
+- [SolidJS](https://github.com/cliqet/solidjs_django_admin)
+
 ### Prerequisites
 - Python 3.12.0
 - Django 5.1.3
