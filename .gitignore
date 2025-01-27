@@ -1,0 +1,89 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Config files
+config.toml
+docker.config.toml
+
+# Environments
+*.env
+*.venv
+env/
+venv/
+ENV/
+VENV/
+env.bak/
+venv.bak/
+
+# Django stuff:
+*db.sqlite3-journal
+src/media/*
+!src/media/.gitkeep
+src/sqlite_dbs/*
+!src/sqlite_dbs/.gitkeep
+
+# JWT keys
+keys/*
+!keys/.gitkeep
+
+# Log files
+*.log
+src/logs/app/*
+!src/logs/app/.gitkeep
+src/logs/gunicorn/*
+!src/logs/gunicorn/.gitkeep
+
+
+# ignore directories
+automation_tools/
+backups/
+
+# Mac Files
+.DS_Store
+
+# IDEs
+.vscode
+.idea
+
+# Scripts
+src/scripts/*
+!src/scripts/__init__.py
+!src/scripts/check_config.py
+!src/scripts/SCRIPTS.MD
+!src/scripts/initialize_data.py
+!src/scripts/load_zipcodes.py
+
+# Personal devtools
+frontend_tester/
+
+# Server files
+
+
+# API documentation
+src/docs/*
+!src/docs/.gitkeep
+
+# docker volumes
+docker_media_vol/*
+!docker_media_vol/.gitkeep
+

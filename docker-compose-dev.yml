@@ -1,0 +1,87 @@
+version: '3.3'
+
+services:
+  custom_admin_db:
+    container_name: custom_admin_db
+    image: postgres:14.13-alpine
+    ports:
+      - "5435:5432"
+    volumes:
+      - pg_custom_admin:/var/lib/postgresql/data/
+    env_file:
+      - ./docker.env
+
+
+  custom_admin_backend:
+    container_name: custom_admin_backend
+    image: custom_admin_backend_app
+    build:
+      context: .
+      dockerfile: devops/dev/backend/Dockerfile
+      args:
+        ARCHITECTURE: ${ARCHITECTURE}
+    restart: always
+    command: /custom_admin_backend/src/run_dev.sh admin-backend
+    volumes:
+      - ./src:/custom_admin_backend/src/
+      - ./docker_media_vol/:/var/www/media/
+      - custom_admin_static_vol:/var/www/static/
+      - ./src/logs/gunicorn/:/var/log/gunicorn/
+      - ./keys/:/custom_admin_backend/keys/
+    expose:
+      - '8000'
+    env_file:
+      - ./docker.env
+    depends_on:
+      - custom_admin_db
+      - custom_admin_redis
+    
+  custom_admin_redis:
+    container_name: custom_admin_redis
+    image: redis:7.4.1
+    restart: always
+    ports:
+      - "6000:6379"
+    volumes:
+      - redis_custom_admin:/data 
+
+  # NOTE: Remove if you will be using a different async task manager
+  custom_admin_worker:
+    container_name: custom_admin_worker
+    image: custom_admin_backend_worker
+    build:
+      context: .
+      dockerfile: devops/dev/backend/Dockerfile
+      args:
+        ARCHITECTURE: ${ARCHITECTURE}
+    restart: always
+    command: /custom_admin_backend/src/run_dev.sh rq-worker
+    volumes:
+      - ./src:/custom_admin_backend/src/
+      - ./docker_media_vol/:/var/www/media/
+      - custom_admin_static_vol:/var/www/static/
+      - ./src/logs/gunicorn/:/var/log/gunicorn/
+      - ./keys/:/custom_admin_backend/keys/
+    env_file:
+      - ./docker.env
+    depends_on:
+      - custom_admin_redis
+      - custom_admin_backend
+
+  custom_admin_nginx:
+    container_name: custom_admin_nginx
+    image: custom_admin_backend_nginx
+    build:
+      context: .
+      dockerfile: devops/dev/nginx/Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker_media_vol/:/var/www/media/
+      - custom_admin_static_vol:/var/www/static/
+    restart: always
+
+volumes:
+  pg_custom_admin:
+  custom_admin_static_vol:
+  redis_custom_admin:

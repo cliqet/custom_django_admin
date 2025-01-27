@@ -1,0 +1,233 @@
+[application]
+  # String. Defaults to https
+  # Set to http on local dev
+  protocol = 'https'
+
+  # Required string. The domain of the application
+  # Set to the appropriate domain if running on server
+  domain = 'localhost'
+
+  # Boolean. If default django admin site is accessible. Defaults to true
+  is_default_admin_enabled = true
+
+  # Required string. Defaults to /media/
+  # URL that handles the media served from MEDIA_ROOT, used for managing stored files. 
+  # It must end in a slash if set to a non-empty value.
+  media_url = '/media/'
+
+  # Required string
+  # Absolute filesystem path to the directory that will hold user-uploaded files
+  # This will be ignored is using S3
+  # NOTE: For docker local setup, use /var/www/media
+  # This will be ignored if using S3 which will be the case for server environment
+  media_root = ''
+
+  # Required string. Defaults to 'static/'
+  # URL to use when referring to static files
+  static_url = 'static/'
+
+  # String. Not needed in local development
+  # The absolute path to the directory where collectstatic will collect static files for deployment
+  # NOTE: For docker local setup, use /var/www/static
+  # This will be ignored if using S3 which will be the case for server environment
+  static_root = ''
+  
+  # Required string
+  # django secret key
+  secret_key = ''
+
+  # Required boolean
+  # Whether app is in debug mode
+  debug = false
+
+  # Required list of strings
+  # The list of domains and ip addresses allowed to run the application
+  # For local, use ['localhost', '127.0.0.1']
+  # Put domain without the protocol in server environment
+  allowed_hosts = []
+
+  # Boolean. Required. Defaults to false
+  # Set to false when you want to use sqlite for your local machine
+  # NOTE: Should be true on server environment and docker environment
+  use_local_postgres = true
+
+  # Boolean. Required. Defaults to true in staging and production
+  # Set to false when you want to use your local machine for static and media files
+  # Should be true on server environment
+  use_local_s3 = false
+
+  # String
+  # refer to list of IANA timezones here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone = 'America/New_York'
+
+  # -------------- CORS --------------
+  # List of strings
+  # A list of origins that are authorized to make cross-site HTTP requests
+  # E.g. ['https://example.com', 'http://localhost:3000']
+  # Include the protocol
+  cors_allowed_origins = []
+
+  # Boolean. Defaults to false
+  # If True, cookies are allowed to be included in cross-site HTTP requests.
+  cors_allow_credentials = false
+  # -------------- END OF CORS --------------
+
+  # -------------- REST FRAMEWORK --------------
+  # Int. Unit in minutes. Defaults to 300
+  # The life of a jwt access token
+  jwt_access_token_life = 300
+
+  # Int. Unit in days. Defaults to 1
+  # The life of a jwt refresh token
+  jwt_refresh_token_life = 3
+
+  # String. Required. The full path to the jwt private key. 
+  # File must be named jwt_private.pem
+  # NOTE: Use /custom_admin_backend/keys/jwt_private.pem for docker and server setup
+  jwt_private_key = '.../jwt_private.pem'
+
+  # String. Required. The full path to the jwt public key
+  # File must be named jwt_public.pem
+  # NOTE: Use /custom_admin_backend/keys/jwt_public.pub for docker and server setup
+  jwt_public_key = '.../jwt_public.pub'
+
+  # Int. Defaults to 20
+  # Maximum results per page in api requests
+  api_max_page_size = 20
+
+  # List of strings. Defaults to ['rest_framework.permissions.IsAuthenticated']
+  # Set to ['rest_framework.permissions.AllowAny'] when testing apis locally
+  api_permission_classes = []
+
+  # Int. Defaults to 60. Throttle rate per minute for anonymous users
+  api_anon_throttle_rate = 60
+
+  # Int. Defaults to 60. Throttle rate per minute for authenticated users
+  api_user_throttle_rate = 60
+  # -------------- END OF REST FRAMEWORK --------------
+
+  # String
+  # Session engine to use for storing session data. Defaults to db when empty
+  # use_local_redis must be true if using cache
+  session_engine = 'django.contrib.sessions.backends.cache'
+
+  # Int. Defaults to 1209600 or 2 weeks (django's default if not set).
+  # How long in seconds a session will last before it gets discarded. This will logout a user
+  # and require them to login
+  session_cookie_age = 1209600
+
+  # Int. Defaults to 86400 seconds / 1 day
+  # Number of seconds before password reset link expires. 
+  password_reset_timeout = 86400
+
+  # Required list of strings for django settings CSRF_TRUSTED_ORIGINS
+  # For prod - 
+  csrf_trusted_origins = ['http://*', 'https://*']
+
+
+[logging_config]
+  # Handlers to use for logging
+  # Use ['file', 'console'] for logging to both file and console.
+  # Defaults to ['console']
+  handlers = ['file', 'console']
+
+  # Required string. Where to store gunicorn logs
+  # NOTE: Use /var/log/gunicorn for docker setup
+  gunicorn_log_path = ''
+
+  [logging_config.file_handler]
+    # Required string
+    # The log level to use for logging to file (e.g. DEBUG, INFO, ...)
+    log_level = 'INFO'
+
+    # Required string
+    # The absolute path to the log directory
+    # NOTE: Use /custom_admin_backend/src/logs/app for docker and server setup
+    log_path = '.../src/logs/app'
+
+    # Required int
+    # Max bytes of log file before it creates another log file
+    max_bytes = 10000
+
+    # Required int
+    # After backup_count number of files are created. It will delete the oldest 
+    # one and create a new log file
+    backup_count = 3
+
+  [logging_config.console_handler]
+    # Required string
+    # The log level to use for logging to file (e.g. DEBUG, INFO, ...)
+    log_level = 'INFO'
+
+[integration]
+  [integration.aws]
+    access_key = ''
+
+    secret_key = ''
+
+    # String.
+    region = ''
+
+    # String. Bucket name where all user uploaded media files would go
+    media_files_bucket = ''
+
+    # Where all private files would go
+    private_files_bucket = ''
+
+  # Adjust if you have a different SMTP provider
+  [integration.smtp2go]
+    # String. Required
+    # The api endpoint to use for sending email messages
+    api_url = ''
+
+    # String. Required
+    # The api key for sending emails
+    api_key = ''
+
+  [integration.cloudflare]
+    # String: to render the turnstile widget on frontend.
+    site_key = ''
+
+    # String: to call Turnstile API to verify the challenge token which is sent from Frontend.
+    secret_key = ''
+
+    # String: Turnstile endpoint to verify the challenge token.
+    verify_api_url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+
+[database]
+  # Refer to docker.env which must match when running in docker
+  [database.psql]
+    # String
+    db_name = ''
+
+    # Required int
+    db_port = 5432
+
+    # String. Use custom_admin_backend_db for docker setup
+    db_host = ''
+
+    # String
+    db_user = ''
+
+    # String. Put empty string if there is no password
+    db_password = ''
+
+  [database.redis]
+    # String: The host of the redis instance. 
+    # Use custom_admin_backend_redis for docker setup
+    host = ''
+    
+    # String: The username of the redis instance
+    username = ''
+
+    # String: The password of the redis instance
+    password = ''
+
+    # Int: The port of the redis instance
+    port = 6379
+
+    # Int: The db index to use for the redis instance
+    db_index = 0
+
+    # Int: The db index to use for the test redis instance
+    test_db_index = 1

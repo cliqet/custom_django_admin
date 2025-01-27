@@ -1,0 +1,35 @@
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include, path
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
+
+from backend.settings.base import (
+    APP_MODE,
+    MEDIA_ROOT,
+    MEDIA_URL,
+    STATIC_ROOT,
+    STATIC_URL,
+    DjangoSettings,
+)
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+
+    path('api/v1/django-admin/', include('django_admin.urls')),
+    path('api/v1/users/', include('users.urls')),
+    path('api/v1/model-docs/', include('documentation.urls')),
+
+    # API documentation 
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Optional UI:
+    path('api/schema/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+]
+
+if APP_MODE == DjangoSettings.LOCAL:
+    urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)
+    urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
