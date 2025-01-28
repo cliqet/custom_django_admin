@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from django_admin.serializers import BaseModelSerializer
@@ -40,3 +41,7 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
         token['session_id'] = str(uuid4())
 
         return token
+    
+
+class ResetPasswordViaLinkBodySerializer(serializers.Serializer):
+    password = serializers.CharField()

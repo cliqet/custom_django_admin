@@ -24,7 +24,11 @@ from .docs import (
     LOGOUT_DOC,
 )
 from .models import CustomUser
-from .serializers import CustomUserDetailsSerializer, CustomUserListSerializer
+from .serializers import (
+    CustomUserDetailsSerializer,
+    CustomUserListSerializer,
+    ResetPasswordViaLinkBodySerializer,
+)
 from .utils import get_user_unique_permissions, organize_permissions
 
 log = logging.getLogger(__name__)
@@ -194,6 +198,41 @@ def verify_password_reset_link(request, uidb64, token):
                 'valid': False, 'message': 'Token is invalid or has expired.'
             }, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        log.error(f'Error verifying password reset link: {str(e)}')
+
         return Response({
             'valid': False, 'message': 'Invalid UID.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def reset_password_via_link(request, uidb64, token):
+    try:
+        body = request.data
+        serialized_body = ResetPasswordViaLinkBodySerializer(data=body)
+        if not serialized_body.is_valid():
+            return Response({
+                'success': False, 'message': 'Invalid request'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Decode the uid
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = CustomUser.objects.get(pk=uid)
+        
+        # Check if the token is valid
+        if default_token_generator.check_token(user, token):
+            user.set_password(body.get('password'))
+            user.save()
+
+            return Response({
+                'success': True, 'message': 'Successfully updated password'
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'success': False, 'message': 'Token is invalid or has expired.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        log.error(f'Error resetting password via link: {str(e)}')
+
+        return Response({
+            'success': False, 'message': 'Invalid request'
         }, status=status.HTTP_400_BAD_REQUEST)
