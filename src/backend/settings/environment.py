@@ -26,6 +26,7 @@ class Environment:
 
         protocol: str = _application_env.get('protocol', 'https')
         domain: str = _application_env.get('domain')
+        ui_domain: str = _application_env.get('ui_domain')
         is_default_admin_enabled: bool = _application_env.get('is_default_admin_enabled', True)
         media_url: str = _application_env.get('media_url', '/media/')
         media_root: str = _application_env.get('media_root')

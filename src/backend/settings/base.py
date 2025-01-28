@@ -295,6 +295,7 @@ PASSWORD_RESET_TIMEOUT = ENV.application.password_reset_timeout
 
 PROTOCOL = ENV.application.protocol
 DOMAIN = ENV.application.domain
+UI_DOMAIN = ENV.application.ui_domain
 
 
 # Cloudflare

@@ -5,7 +5,10 @@
 
   # Required string. The domain of the application
   # Set to the appropriate domain if running on server
-  domain = 'localhost'
+  domain = 'localhost:8000'
+
+  # Required string. The domain of the frontend application
+  ui_domain = 'localhost:3000'
 
   # Boolean. If default django admin site is accessible. Defaults to true
   is_default_admin_enabled = true

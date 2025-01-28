@@ -1,5 +1,8 @@
 import logging
 
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -10,7 +13,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from backend.settings.base import APP_MODE, DjangoSettings
+from backend.settings.base import APP_MODE, PROTOCOL, UI_DOMAIN, DjangoSettings
 from django_admin.serializers import PermissionSerializer
 
 from .docs import (
@@ -144,3 +147,53 @@ def logout(request):
     }, status=status.HTTP_202_ACCEPTED)
     response.delete_cookie('app.refresh_token')  # Remove the refresh token cookie
     return response
+
+@api_view(['GET'])
+def send_password_reset_link(request, uid):
+    try:
+        user = CustomUser.objects.get(uid=uid)
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        link = f'{PROTOCOL}://{UI_DOMAIN}/users/reset/{uidb64}/{token}'
+        print('LINK', link)
+
+        return Response({
+            'success': True,
+            'message': 'Password reset link has been sent to the email of the user'
+        }, status=status.HTTP_200_OK)
+    except CustomUser.DoesNotExist as e:
+        log.error(f'Password reset error for {uid}: {str(e)}')
+
+        return Response({
+            'success': False,
+            'message': 'User does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception:
+        log.error(f'Password reset error for {uid}: {str(e)}')
+
+        return Response({
+            'success': False,
+            'message': 'Something went wrong.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET'])
+def verify_password_reset_link(request, uidb64, token):
+    try:
+        # Decode the uid
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = CustomUser.objects.get(pk=uid)
+        
+        # Check if the token is valid
+        if default_token_generator.check_token(user, token):
+            return Response({
+                'valid': True, 'message': 'Token is valid.'
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'valid': False, 'message': 'Token is invalid or has expired.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({
+            'valid': False, 'message': 'Invalid UID.'
+        }, status=status.HTTP_400_BAD_REQUEST)
