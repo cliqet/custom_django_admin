@@ -75,7 +75,7 @@ services:
       context: .
       dockerfile: devops/dev/nginx/Dockerfile
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
       - ./docker_media_vol/:/var/www/media/
       - custom_admin_static_vol:/var/www/static/

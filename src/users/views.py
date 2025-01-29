@@ -15,6 +15,8 @@ from rest_framework_simplejwt.views import (
 
 from backend.settings.base import APP_MODE, PROTOCOL, UI_DOMAIN, DjangoSettings
 from django_admin.serializers import PermissionSerializer
+from services.email_service import send_email
+from services.queue_service import enqueue
 
 from .docs import (
     GET_ALL_USERS_DOC,
@@ -160,6 +162,19 @@ def send_password_reset_link(request, uid):
         token = default_token_generator.make_token(user)
         link = f'{PROTOCOL}://{UI_DOMAIN}/users/reset/{uidb64}/{token}'
         print('LINK', link)
+
+        subject = 'Password Reset Link'
+
+        enqueue(
+            send_email,
+            [user.email],
+            subject,
+            email_template = 'email/reset-password.html',
+            template_context={
+                'firstname': user.first_name,
+                'link': link,
+            }
+        )
 
         return Response({
             'success': True,

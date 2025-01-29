@@ -103,8 +103,7 @@ In the root directory, run the script
 ```bash
 ./devops/dev/deploy_dev.sh
 ```
-and you should be able to access the application using `localhost` or `127.0.0.1` as the domain. Note that it does not need the port anymore. For ports of different services, adjust it to 
-the port that you want to expose in the docker-compose file.
+and you should be able to access the application using `http://localhost:8000`
 
 #### Utility scripts
 You will be needing to run `manage.py` and `pytest` commands often. There is a `scripts` directory in the root directory that will allow you to run these commands without having to do docker commands anymore.

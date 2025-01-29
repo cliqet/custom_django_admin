@@ -37,6 +37,7 @@ class Environment:
         use_local_postgres: bool = _application_env.get('use_local_postgres', True)
         use_local_s3: bool = _application_env.get('use_local_s3', True)
         time_zone: str = _application_env.get('time_zone', 'UTC')
+        default_email_sender: str = _application_env.get('default_email_sender')
         allowed_hosts: list[str] = _application_env.get('allowed_hosts')
         csrf_trusted_origins: list[str] = _application_env.get('csrf_trusted_origins')
         cors_allowed_origins: list[str] = _application_env.get('cors_allowed_origins')
@@ -56,6 +57,7 @@ class Environment:
         session_cookie_age: int = _application_env.get('session_cookie_age', 1209600)
         password_reset_timeout: int = _application_env.get('password_reset_timeout', 86400)
         csrf_trusted_origins: list[str] = _application_env.get('csrf_trusted_origins')
+        brand_name: str = _application_env.get('brand_name', 'CUSTOM DJANGO ADMIN')
 
         
     class LoggingConfig:

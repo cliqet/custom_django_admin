@@ -118,7 +118,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -289,6 +289,7 @@ SPECTACULAR_SETTINGS = {
 # SMTP settings. Adjust for SMTP provider
 SMTP_API_URL = ENV.integration.smtp.api_url
 SMTP_API_KEY = ENV.integration.smtp.api_key
+DEFAULT_EMAIL_SENDER= ENV.application.default_email_sender
 
 
 PASSWORD_RESET_TIMEOUT = ENV.application.password_reset_timeout
@@ -304,6 +305,8 @@ CLOUDFLARE_TURNSTILE_SECRET_KEY = ENV.integration.cloudflare.secret_key
 CLOUDFLARE_TURNSTILE_VERIFY_URL = ENV.integration.cloudflare.verify_api_url
 
 CSRF_TRUSTED_ORIGINS = ENV.application.csrf_trusted_origins
+
+BRAND_NAME = ENV.application.brand_name
 
 log.info('Base settings loaded')
 

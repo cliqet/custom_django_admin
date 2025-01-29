@@ -63,6 +63,9 @@
   # refer to list of IANA timezones here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   time_zone = 'America/New_York'
 
+  # Required string. Default email sender
+  default_email_sender = ''
+
   # -------------- CORS --------------
   # List of strings
   # A list of origins that are authorized to make cross-site HTTP requests
@@ -124,8 +127,10 @@
   password_reset_timeout = 86400
 
   # Required list of strings for django settings CSRF_TRUSTED_ORIGINS
-  # For prod - 
-  csrf_trusted_origins = ['http://*', 'https://*']
+  csrf_trusted_origins = ['http://localhost:8000']
+
+  # String. Brand name which appears in email header and footer
+  brand_name = ''
 
 
 [logging_config]
