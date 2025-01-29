@@ -161,7 +161,6 @@ def send_password_reset_link(request, uid):
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         link = f'{PROTOCOL}://{UI_DOMAIN}/users/reset/{uidb64}/{token}'
-        print('LINK', link)
 
         subject = 'Password Reset Link'
 

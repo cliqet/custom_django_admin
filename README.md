@@ -16,7 +16,8 @@
 - Redis >= 7
 
 ### Integrations
-Make sure you have an account with Cloudflare and create a turnstile widget. This is used for the login form.
+- `Cloudflare`: Make sure you have an account with Cloudflare and create a turnstile widget. This is used for the login form.
+- `SMTP2GO`: For email services. Make sure you have an API key. If you want a different provider, you can change the implementation. Feel free to customize and redesign the email templates used.
 
 ### Before starting
 There is a current app registered named demo which you can use to see how the backend works. It has a model `DemoModel` that has all the fields that are supported and will give you a feel as to how to setup those fields. When you are about to start a project, just delete the demo folder and remove it from installed apps.
