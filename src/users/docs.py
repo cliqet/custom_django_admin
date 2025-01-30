@@ -92,3 +92,33 @@ Logs out the user and deletes the refresh token cookie. Returns:
 }
 ```
 """
+
+SEND_PASSWORD_RESET_LINK_DOC = """
+Sends the password reset link based on user uid. Returns
+```json
+{
+    "success": true,
+    "message": "Password reset link has been sent to the email of the user"
+}
+```
+"""
+
+VERIFY_PASSWORD_RESET_LINK_DOC = """
+Checks whether the password reset link is valid. Returns:
+```json
+{
+    "valid": true, 
+    "message": "Token is valid."
+}
+```
+"""
+
+RESET_PASSWORD_VIA_LINK_DOC = """
+Resets the password of the user from reset link. Returns:
+```json
+{
+    "success": true, 
+    "message": "Successfully updated password"
+}
+```
+"""

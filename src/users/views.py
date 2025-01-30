@@ -24,6 +24,9 @@ from .docs import (
     GET_USER_PERMISSIONS_DOC,
     LOGIN_DOC,
     LOGOUT_DOC,
+    RESET_PASSWORD_VIA_LINK_DOC,
+    SEND_PASSWORD_RESET_LINK_DOC,
+    VERIFY_PASSWORD_RESET_LINK_DOC,
 )
 from .models import CustomUser
 from .serializers import (
@@ -154,6 +157,13 @@ def logout(request):
     response.delete_cookie('app.refresh_token')  # Remove the refresh token cookie
     return response
 
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            description=SEND_PASSWORD_RESET_LINK_DOC
+        ),
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def send_password_reset_link(request, uid):
@@ -196,6 +206,13 @@ def send_password_reset_link(request, uid):
         }, status=status.HTTP_400_BAD_REQUEST)
     
 
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            description=VERIFY_PASSWORD_RESET_LINK_DOC
+        ),
+    }
+)
 @api_view(['GET'])
 def verify_password_reset_link(request, uidb64, token):
     try:
@@ -218,7 +235,14 @@ def verify_password_reset_link(request, uidb64, token):
         return Response({
             'valid': False, 'message': 'Invalid UID.'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
+@extend_schema(
+    responses={
+        status.HTTP_201_CREATED: OpenApiResponse(
+            description=RESET_PASSWORD_VIA_LINK_DOC
+        ),
+    }
+)
 @api_view(['POST'])
 def reset_password_via_link(request, uidb64, token):
     try:
@@ -240,7 +264,7 @@ def reset_password_via_link(request, uidb64, token):
 
             return Response({
                 'success': True, 'message': 'Successfully updated password'
-            }, status=status.HTTP_200_OK)
+            }, status=status.HTTP_201_CREATED)
         else:
             return Response({
                 'success': False, 'message': 'Token is invalid or has expired.'
