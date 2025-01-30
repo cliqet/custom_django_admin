@@ -112,4 +112,38 @@ def test_login_valid_user(api_client, superuser):
 
     assert 'access' in data
     assert response.cookies.get('app.refresh_token') is not None
+
+def test_send_password_reset_link_non_admin(api_client, limited_admin):
+    client = api_client()
+
+    response = client.get(
+        reverse('send_password_reset_link', kwargs={'uid': limited_admin.uid}), 
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer invalidtoken'}
+    )
+    assert response.status_code == 401
+
+
+def test_send_password_reset_link_admin(api_client, superuser_token, limited_admin):
+    client = api_client()
+
+    response = client.get(
+        reverse('send_password_reset_link', kwargs={'uid': limited_admin.uid}), 
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 200
+    data = response.data
+
+    assert data.get('success')
+
+def test_send_password_reset_link_admin_no_user(api_client, superuser_token):
+    client = api_client()
+
+    response = client.get(
+        reverse('send_password_reset_link', kwargs={'uid': 'not_a_user'}), 
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 404
     

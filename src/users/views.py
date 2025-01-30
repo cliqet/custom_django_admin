@@ -155,6 +155,7 @@ def logout(request):
     return response
 
 @api_view(['GET'])
+@permission_classes([IsAdminUser])
 def send_password_reset_link(request, uid):
     try:
         user = CustomUser.objects.get(uid=uid)
