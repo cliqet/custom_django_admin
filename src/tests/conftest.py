@@ -142,7 +142,7 @@ def superuser_token(api_client, superuser):
         'password': 'SomePassword1'
     }
     response = client.post(
-        reverse('token_obtain_pair'),
+        reverse('login'),
         data=data,
         format='json'
     )
@@ -157,7 +157,7 @@ def limited_admin_token(api_client, limited_admin):
         'password': 'SomePassword1'
     }
     response = client.post(
-        reverse('token_obtain_pair'),
+        reverse('login'),
         data=data,
         format='json'
     )
@@ -174,7 +174,7 @@ def non_admin_token(api_client, non_admin):
     }
 
     response = client.post(
-        reverse('token_obtain_pair'),
+        reverse('login'),
         data=data,
         format='json',
     )

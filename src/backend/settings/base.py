@@ -8,12 +8,12 @@ from .logging import get_logging_config
 
 ENV = env
 
+APP_MODE = DjangoSettings.LOCAL
+
 # Logging Configuration
 LOGGING = get_logging_config(ENV)
 
 log = logging.getLogger(__name__)
-
-APP_MODE = DjangoSettings.LOCAL
 
 MODES = {
     'backend.settings.base': DjangoSettings.LOCAL,
