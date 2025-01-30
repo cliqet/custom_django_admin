@@ -76,7 +76,40 @@ def test_get_user_permissions_admin(api_client, superuser_token, superuser):
     first_obj = data.get('permissions').get(first_key)
     first_nested_key = next(iter(first_obj))
     first_nested_obj = first_obj.get(first_nested_key)
-    
+
     assert 'perms_ids' in first_nested_obj
     assert 'perms' in first_nested_obj
+
+def test_login_non_user(api_client, db):
+    client = api_client()
+    data = {
+        'email': 'none@mail.com',
+        'password': 'password123'
+    }
+
+    response = client.post(
+        reverse('login'),
+        data=data,
+        format='json',
+    )
+    assert response.status_code == 401
+
+def test_login_valid_user(api_client, superuser):
+    client = api_client()
+
+    data = {
+        'email': superuser.email,
+        'password': 'SomePassword1'
+    }
+
+    response = client.post(
+        reverse('login'), 
+        format='json',
+        data=data,
+    )
+    assert response.status_code == 200
+    data = response.data
+
+    assert 'access' in data
+    assert response.cookies.get('app.refresh_token') is not None
     
