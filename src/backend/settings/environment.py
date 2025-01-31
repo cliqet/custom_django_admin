@@ -58,6 +58,7 @@ class Environment:
         password_reset_timeout: int = _application_env.get('password_reset_timeout', 86400)
         csrf_trusted_origins: list[str] = _application_env.get('csrf_trusted_origins')
         brand_name: str = _application_env.get('brand_name', 'CUSTOM DJANGO ADMIN')
+        rq_api_token: str = _application_env.get('rq_api_token', '')
 
         
     class LoggingConfig:

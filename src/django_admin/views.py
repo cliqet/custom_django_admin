@@ -20,6 +20,7 @@ from rest_framework.serializers import Serializer
 from django_admin.decorators import has_model_permission
 from django_admin.permissions import has_user_permission
 from services.cloudflare import verify_token
+from services.queue_service import get_queue_list
 
 from .actions import ACTIONS
 from .configuration import APP_LIST_CONFIG_OVERRIDE
@@ -353,6 +354,7 @@ def get_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def change_model_record(request, app_label: str, model_name: str, pk: str):
     boolean_values = {
         'true': True,
@@ -480,6 +482,7 @@ def change_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def add_model_record(request, app_label: str, model_name: str):
     boolean_values = {
         'true': True,
@@ -642,6 +645,7 @@ def add_model_record(request, app_label: str, model_name: str):
     }
 )
 @api_view(['GET'])
+@permission_classes([IsAdminUser])
 def get_model_listview(request, app_label: str, model_name: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -722,6 +726,7 @@ def get_model_listview(request, app_label: str, model_name: str):
     }
 )
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def custom_action_view(request, app_label: str, model_name: str, func: str):
     try:
         body = request.data
@@ -743,6 +748,7 @@ def custom_action_view(request, app_label: str, model_name: str, func: str):
         )
     
 @api_view(['GET'])
+@permission_classes([IsAdminUser])
 def get_inline_listview(request, parent_app_label: str, parent_model_name: str):
     try:
         model = get_model(f'{parent_app_label}.{parent_model_name}')
@@ -822,5 +828,19 @@ def verify_cloudflare_token(request):
         return Response(transform_dict_to_camel_case({
             'is_valid': False
         }), status=status.HTTP_400_BAD_REQUEST)
+    
 
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_worker_queues(request):
+    try:
+        queues = get_queue_list()
+
+        return Response({
+            'queues': queues
+        }, status=status.HTTP_200_OK)
+    except Exception:
+        return Response({
+            'queues': []
+        }, status=status.HTTP_400_BAD_REQUEST)
 

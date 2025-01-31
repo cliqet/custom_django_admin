@@ -308,5 +308,7 @@ CSRF_TRUSTED_ORIGINS = ENV.application.csrf_trusted_origins
 
 BRAND_NAME = ENV.application.brand_name
 
+RQ_API_TOKEN = ENV.application.rq_api_token
+
 log.info('Base settings loaded')
 

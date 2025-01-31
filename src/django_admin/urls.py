@@ -15,6 +15,7 @@ from .views import (
     get_model_listview,
     get_model_record,
     get_permissions,
+    get_worker_queues,
     verify_cloudflare_token,
 )
 
@@ -34,4 +35,6 @@ urlpatterns = [
     path('model-fields/<str:app_label>/<str:model_name>', get_model_fields, name='get_model_fields'),
     path('model-admin-settings/<str:app_label>/<str:model_name>', get_model_admin_settings, name='get_model_admin_settings'),
     path('verify-cloudflare-token', verify_cloudflare_token, name='verify_cloudflare_token'),
+    path('verify-cloudflare-token', verify_cloudflare_token, name='verify_cloudflare_token'),
+    path('get-worker-queues', get_worker_queues, name='get_worker_queues'),
 ]
