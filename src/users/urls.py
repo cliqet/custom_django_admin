@@ -12,6 +12,8 @@ from .views import (
 )
 
 urlpatterns = [
+    # This is for admin users only. DO NOT USE for website users if you have a 
+    # customer facing website. 
     path('login', CustomTokenObtainPairView.as_view(), name='login'),
     path('logout', logout, name='logout'),
     path('send-password-reset-link/<str:uid>', send_password_reset_link, name='send_password_reset_link'),

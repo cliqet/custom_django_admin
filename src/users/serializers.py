@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from django_admin.serializers import BaseModelSerializer
@@ -41,6 +42,22 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
         token['session_id'] = str(uuid4())
 
         return token
+    
+    def validate(self, attrs):
+        # Call the parent's validate method to authenticate the user
+        data = super().validate(attrs)
+
+        # The user is now authenticated and accessible through the serializer
+        user = self.user  # This is set by the parent validate method
+
+        # Check if the user is staff
+        if not user.is_staff:
+            raise AuthenticationFailed(
+                'You do not have permission to access this resource.', 
+                code='permission_denied'
+            )
+
+        return data
     
 
 class ResetPasswordViaLinkBodySerializer(serializers.Serializer):

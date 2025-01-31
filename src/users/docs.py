@@ -76,7 +76,8 @@ perms_ids and perms are just the reverse of each other
 """
 
 LOGIN_DOC = """
-Requires the email and the password for the body and sends the refresh token as secure cookie. Returns:
+Admin login. Requires the email and the password for the body and sends the refresh 
+token as secure cookie. Returns:
 ```json
 {
     "access": "<access token>"
@@ -85,7 +86,7 @@ Requires the email and the password for the body and sends the refresh token as 
 """
 
 LOGOUT_DOC = """
-Logs out the user and deletes the refresh token cookie. Returns:
+Admin logout. Logs out the user and deletes the refresh token cookie. Returns:
 ```json
 {
     "message": "Logged out successfully."
