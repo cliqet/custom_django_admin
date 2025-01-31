@@ -91,5 +91,7 @@ class HTMLField(models.TextField):
     """
         Use this for HTML fields to have WYSIWYG editing
     """
-    ...
+
+
+
 

@@ -19,9 +19,9 @@ from backend.settings.base import (
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    path('api/v1/django-admin/users/', include('users.urls')),
+    path('api/v1/django-admin/model-docs/', include('documentation.urls')),
     path('api/v1/django-admin/', include('django_admin.urls')),
-    path('api/v1/users/', include('users.urls')),
-    path('api/v1/model-docs/', include('documentation.urls')),
 
     # API documentation 
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

@@ -40,7 +40,7 @@ from .docs import (
     GET_MODEL_RECORD_DOC,
     GET_PERMISSIONS_DOC,
     VERIFY_CLOUDFLARE_TOKEN_DOC,
-    VERIFY_CLOUDFLARE_TOKEN_ERROR_DOC
+    VERIFY_CLOUDFLARE_TOKEN_ERROR_DOC,
 )
 from .serializers import (
     AppSerializer,
