@@ -621,3 +621,77 @@ Verifies the cloudflare turnstile token. Returns
 }
 ```
 """
+
+GET_WORKER_QUEUES_DOC = """
+Returns a list of all queues with their stats from django-rq. Returns:
+```json
+{
+    "queues": [
+        {
+            "fields": [
+                {
+                    "label": "Name",
+                    "value": "default",
+                    "field": "name"
+                },
+                {
+                    "label": "Queued Jobs",
+                    "value": 0,
+                    "field": "jobs"
+                },
+                {
+                    "label": "Oldest Queued Job",
+                    "value": "-",
+                    "field": "oldest_job_timestamp"
+                },
+                {
+                    "label": "Started Jobs",
+                    "value": 0,
+                    "field": "started_jobs"
+                },
+                {
+                    "label": "Workers",
+                    "value": 2,
+                    "field": "workers"
+                },
+                {
+                    "label": "Finished Jobs",
+                    "value": 0,
+                    "field": "finished_jobs"
+                },
+                {
+                    "label": "Deferred Jobs",
+                    "value": 0,
+                    "field": "deferred_jobs"
+                },
+                {
+                    "label": "Failed Jobs",
+                    "value": 1,
+                    "field": "failed_jobs"
+                },
+                {
+                    "label": "Scheduled Jobs",
+                    "value": 0,
+                    "field": "scheduled_jobs"
+                },
+                {
+                    "label": "Host",
+                    "value": "custom_admin_redis",
+                    "field": "host"
+                },
+                {
+                    "label": "Port",
+                    "value": 6379,
+                    "field": "port"
+                },
+                {
+                    "label": "Scheduler PID",
+                    "value": null,
+                    "field": "scheduler_pid"
+                }
+            ]
+        }
+    ]
+}
+```
+"""
