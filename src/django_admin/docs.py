@@ -628,12 +628,8 @@ Returns a list of all queues with their stats from django-rq. Returns:
 {
     "queues": [
         {
+            "name": "default",
             "fields": [
-                {
-                    "label": "Name",
-                    "value": "default",
-                    "field": "name"
-                },
                 {
                     "label": "Queued Jobs",
                     "value": 0,

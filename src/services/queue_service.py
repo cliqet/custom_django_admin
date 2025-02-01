@@ -22,8 +22,7 @@ def get_queue_list() -> list[dict]:
 
     queues = []
     for q in data.get('queues'):
-        queue = {'fields': []}
-        queue['fields'].append({'label': 'Name', 'value': q.get('name'), 'field': 'name'})
+        queue = {'fields': [], 'name': q.get('name')}
         queue['fields'].append({'label': 'Queued Jobs', 'value': q.get('jobs'), 'field': 'jobs'})
         queue['fields'].append({'label': 'Oldest Queued Job', 'value': q.get('oldest_job_timestamp'), 'field': 'oldest_job_timestamp'})
         queue['fields'].append({'label': 'Started Jobs', 'value': q.get('started_jobs'), 'field': 'started_jobs'})
