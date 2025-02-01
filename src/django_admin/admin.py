@@ -26,7 +26,7 @@ class CUSTOM_ACTIONS(Enum):
     """
         Define all custom action names here
     """
-    DELETE_LISTVIEW = 'delete_listview'
+    DELETE_LISTVIEW = 'delete'
 
 
 class BaseModelAdmin(admin.ModelAdmin):

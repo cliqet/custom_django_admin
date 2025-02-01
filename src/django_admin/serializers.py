@@ -222,3 +222,18 @@ class ModelAdminSettingsSerializer(serializers.Serializer):
 class VerifyTokenBodySerializer(serializers.Serializer):
     token = serializers.CharField()
 
+
+class QueuedJobSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    created_at = serializers.DateTimeField()
+    started_at = serializers.DateTimeField()
+    enqueued_at = serializers.DateTimeField()
+    ended_at = serializers.DateTimeField()
+    timeout = serializers.IntegerField()
+    ttl = serializers.IntegerField(allow_null=True)
+    meta = serializers.DictField()
+    callable = serializers.CharField()
+    args = serializers.ListField(child=serializers.CharField())
+    kwargs = serializers.DictField()
+    execution_info = serializers.CharField()
+

@@ -20,7 +20,7 @@ from rest_framework.serializers import Serializer
 from django_admin.decorators import has_model_permission
 from django_admin.permissions import has_user_permission
 from services.cloudflare import verify_token
-from services.queue_service import get_queue_list
+from services.queue_service import get_failed_jobs, get_job, get_queue_list
 
 from .actions import ACTIONS
 from .configuration import APP_LIST_CONFIG_OVERRIDE
@@ -52,6 +52,7 @@ from .serializers import (
     ModelAdminSettingsSerializer,
     ModelFieldSerializer,
     PermissionSerializer,
+    QueuedJobSerializer,
     VerifyTokenBodySerializer,
 )
 from .util_models import (
@@ -847,8 +848,51 @@ def get_worker_queues(request):
         return Response({
             'queues': queues
         }, status=status.HTTP_200_OK)
-    except Exception:
+    except Exception as e:
+        log.error(f'Error retrieving worker queues: {str(e)}')
+
         return Response({
             'queues': []
         }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_failed_queued_jobs(request, queue_name: str):
+    try:
+        jobs = get_failed_jobs(queue_name)
+        serialized_jobs = QueuedJobSerializer(jobs, many=True).data
 
+        return Response({
+            'failed_jobs': {
+                'results': serialized_jobs,
+                'count': len(jobs),
+                'table_fields': ['id', 'created_at', 'enqueued_at', 'ended_at', 'callable']
+            }
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        log.error(f'Error retrieving queue failed jobs for {queue_name}: {str(e)}')
+
+        return Response({
+            'failed_jobs': {
+                'results': [],
+                'count': 0,
+                'table_fields': ['id', 'created_at', 'enqueued_at', 'ended_at', 'callable']
+            }
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_queued_job(request, queue_name: str, job_id: str):
+    try:
+        job = get_job(queue_name, job_id)
+
+        return Response({
+            'job': QueuedJobSerializer(job).data,
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        log.error(f'Error retrieving job id {job_id} from queue {queue_name}: {str(e)}')
+
+        return Response({
+            'job': None,
+        }, status=status.HTTP_400_BAD_REQUEST)
