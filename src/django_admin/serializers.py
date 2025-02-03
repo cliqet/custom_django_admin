@@ -237,3 +237,8 @@ class QueuedJobSerializer(serializers.Serializer):
     kwargs = serializers.DictField()
     execution_info = serializers.CharField()
 
+
+class RequeueJobBodySerializer(serializers.Serializer):
+    queue_name = serializers.CharField()
+    job_id = serializers.CharField()
+

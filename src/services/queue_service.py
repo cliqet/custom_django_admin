@@ -1,7 +1,9 @@
+import logging
 from typing import Any, Callable
 
 import django_rq
 import httpx
+from rq import Queue
 from rq.job import Job
 from rq.registry import FailedJobRegistry
 
@@ -12,6 +14,8 @@ from backend.settings.base import (
     RQ_API_TOKEN,
     DjangoSettings,
 )
+
+log = logging.getLogger(__name__)
 
 
 def build_job_dict(job: Job) -> dict:
@@ -81,3 +85,15 @@ def get_job(queue_name: str, job_id: str) -> dict:
     redis_conn = django_rq.get_connection(queue_name)
     job = Job.fetch(job_id, connection=redis_conn)
     return build_job_dict(job)
+
+def requeue_job(queue_name: str, job_id: str) -> None:
+    redis_conn = django_rq.get_connection(queue_name)
+
+    queue = Queue(queue_name, connection=redis_conn)
+    registry = queue.failed_job_registry
+    for failed_job_id in registry.get_job_ids():
+        if failed_job_id == job_id:
+            registry.requeue(job_id)
+            break
+
+    log.info(f'Requeued job {job_id} for queue {queue_name}')

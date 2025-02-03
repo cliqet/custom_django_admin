@@ -18,6 +18,7 @@ from .views import (
     get_permissions,
     get_queued_job,
     get_worker_queues,
+    requeue_failed_job,
     verify_cloudflare_token,
 )
 
@@ -40,5 +41,6 @@ urlpatterns = [
     path('verify-cloudflare-token', verify_cloudflare_token, name='verify_cloudflare_token'),
     path('worker-queues', get_worker_queues, name='get_worker_queues'),
     path('worker-failed-jobs/<str:queue_name>', get_failed_queued_jobs, name='get_failed_queued_jobs'),
+    path('worker-jobs/requeue', requeue_failed_job, name='requeue_failed_job'),
     path('worker-jobs/<str:queue_name>/<str:job_id>', get_queued_job, name='get_queued_job'),
 ]
