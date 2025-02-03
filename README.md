@@ -332,6 +332,9 @@ APP_LIST_CONFIG_OVERRIDE = {
 }
 ```
 
+### Task Queue Workers
+This also includes `django-rq` as it's current task queue worker which is used currently for emails. You can view the stats of your queue and access the failed queues and requeue or delete them.
+
 ### Other customizations
 Set your preferred `DASHBOARD_URL_PREFIX` in django_admin.constants. You can also just 
 build your own views and not use the generic views. This means you can also change the routes 
