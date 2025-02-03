@@ -33,6 +33,7 @@ from .docs import (
     CUSTOM_ACTION_VIEW_DOC,
     GET_APPS_DOC,
     GET_CONTENT_TYPES_DOC,
+    GET_FAILED_QUEUED_JOBS_DOC,
     GET_GROUPS_DOC,
     GET_LOG_ENTRIES_DOC,
     GET_MODEL_ADMIN_SETTINGS_DOC,
@@ -40,7 +41,9 @@ from .docs import (
     GET_MODEL_LISTVIEW_DOC,
     GET_MODEL_RECORD_DOC,
     GET_PERMISSIONS_DOC,
+    GET_QUEUED_JOB_DOC,
     GET_WORKER_QUEUES_DOC,
+    REQUEUE_FAILED_JOB_DOC,
     VERIFY_CLOUDFLARE_TOKEN_DOC,
     VERIFY_CLOUDFLARE_TOKEN_ERROR_DOC,
 )
@@ -856,6 +859,14 @@ def get_worker_queues(request):
             'queues': []
         }, status=status.HTTP_400_BAD_REQUEST)
     
+
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            description=GET_FAILED_QUEUED_JOBS_DOC
+        ),
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_failed_queued_jobs(request, queue_name: str):
@@ -882,6 +893,13 @@ def get_failed_queued_jobs(request, queue_name: str):
         }, status=status.HTTP_400_BAD_REQUEST)
     
 
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            description=GET_QUEUED_JOB_DOC
+        ),
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_queued_job(request, queue_name: str, job_id: str):
@@ -899,6 +917,14 @@ def get_queued_job(request, queue_name: str, job_id: str):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+@extend_schema(
+    responses={
+        status.HTTP_201_CREATED: OpenApiResponse(
+            description=REQUEUE_FAILED_JOB_DOC
+        ),
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def requeue_failed_job(request):
