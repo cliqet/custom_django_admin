@@ -621,3 +621,154 @@ Verifies the cloudflare turnstile token. Returns
 }
 ```
 """
+
+GET_WORKER_QUEUES_DOC = """
+Returns a list of all queues with their stats from django-rq. Returns:
+```json
+{
+    "queues": [
+        {
+            "name": "default",
+            "fields": [
+                {
+                    "label": "Queued Jobs",
+                    "value": 0,
+                    "field": "jobs"
+                },
+                {
+                    "label": "Oldest Queued Job",
+                    "value": "-",
+                    "field": "oldest_job_timestamp"
+                },
+                {
+                    "label": "Started Jobs",
+                    "value": 0,
+                    "field": "started_jobs"
+                },
+                {
+                    "label": "Workers",
+                    "value": 2,
+                    "field": "workers"
+                },
+                {
+                    "label": "Finished Jobs",
+                    "value": 0,
+                    "field": "finished_jobs"
+                },
+                {
+                    "label": "Deferred Jobs",
+                    "value": 0,
+                    "field": "deferred_jobs"
+                },
+                {
+                    "label": "Failed Jobs",
+                    "value": 1,
+                    "field": "failed_jobs"
+                },
+                {
+                    "label": "Scheduled Jobs",
+                    "value": 0,
+                    "field": "scheduled_jobs"
+                },
+                {
+                    "label": "Host",
+                    "value": "custom_admin_redis",
+                    "field": "host"
+                },
+                {
+                    "label": "Port",
+                    "value": 6379,
+                    "field": "port"
+                },
+                {
+                    "label": "Scheduler PID",
+                    "value": null,
+                    "field": "scheduler_pid"
+                }
+            ]
+        }
+    ]
+}
+```
+"""
+
+GET_FAILED_QUEUED_JOBS_DOC = """
+Retrieve a list of failed jobs. Returns:
+```json
+{
+    "failed_jobs": {
+        "results": [
+            {
+                "id": "60d65f0e-a55a-4436-8bd5-86fe451b671d",
+                "created_at": "2025-02-03T10:33:23.731922+07:00",
+                "started_at": "2025-02-03T10:33:23.917602+07:00",
+                "enqueued_at": "2025-02-03T10:33:23.745892+07:00",
+                "ended_at": "2025-02-03T10:33:23.934963+07:00",
+                "timeout": 360,
+                "ttl": null,
+                "meta": {},
+                "callable": "scripts.queue.func",
+                "args": [
+                    "FOO"
+                ],
+                "kwargs": {
+                    "bar": "BAZ"
+                },
+                "execution_info": "Traceback ... Exception: Forced fail\n"
+            }
+        ],
+        "count": 1,
+        "table_fields": [
+            "id",
+            "created_at",
+            "enqueued_at",
+            "ended_at",
+            "callable"
+        ]
+    }
+}
+```
+"""
+
+GET_QUEUED_JOB_DOC = """
+Retrieve the specific queued job. Returns:
+```json
+{
+    "job": {
+        "id": "60d65f0e-a55a-4436-8bd5-86fe451b671d",
+        "created_at": "2025-02-03T10:33:23.731922+07:00",
+        "started_at": "2025-02-03T10:33:23.917602+07:00",
+        "enqueued_at": "2025-02-03T10:33:23.745892+07:00",
+        "ended_at": "2025-02-03T10:33:23.934963+07:00",
+        "timeout": 360,
+        "ttl": null,
+        "meta": {},
+        "callable": "scripts.queue.func",
+        "args": [
+            "FOO"
+        ],
+        "kwargs": {
+            "bar": "BAZ"
+        },
+        "execution_info": "Traceback ... Exception: Forced fail\n"
+    }
+}
+```
+"""
+
+REQUEUE_FAILED_JOB_DOC = """
+Requeues a failed job. Requires the payload
+```json
+{
+    "queue_name": "<string>",
+    "job_id": "<string>"
+}
+```
+Returns on success
+```json
+{
+    "success": True,
+    "message": "<string>"
+}
+```
+"""

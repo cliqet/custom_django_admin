@@ -20,6 +20,13 @@ from rest_framework.serializers import Serializer
 from django_admin.decorators import has_model_permission
 from django_admin.permissions import has_user_permission
 from services.cloudflare import verify_token
+from services.queue_service import (
+    delete_jobs,
+    get_failed_jobs,
+    get_job,
+    get_queue_list,
+    requeue_jobs,
+)
 
 from .actions import ACTIONS
 from .configuration import APP_LIST_CONFIG_OVERRIDE
@@ -32,6 +39,7 @@ from .docs import (
     CUSTOM_ACTION_VIEW_DOC,
     GET_APPS_DOC,
     GET_CONTENT_TYPES_DOC,
+    GET_FAILED_QUEUED_JOBS_DOC,
     GET_GROUPS_DOC,
     GET_LOG_ENTRIES_DOC,
     GET_MODEL_ADMIN_SETTINGS_DOC,
@@ -39,6 +47,9 @@ from .docs import (
     GET_MODEL_LISTVIEW_DOC,
     GET_MODEL_RECORD_DOC,
     GET_PERMISSIONS_DOC,
+    GET_QUEUED_JOB_DOC,
+    GET_WORKER_QUEUES_DOC,
+    REQUEUE_FAILED_JOB_DOC,
     VERIFY_CLOUDFLARE_TOKEN_DOC,
     VERIFY_CLOUDFLARE_TOKEN_ERROR_DOC,
 )
@@ -50,6 +61,8 @@ from .serializers import (
     ModelAdminSettingsSerializer,
     ModelFieldSerializer,
     PermissionSerializer,
+    QueuedJobSerializer,
+    RequeueOrDeleteJobsBodySerializer,
     VerifyTokenBodySerializer,
 )
 from .util_models import (
@@ -353,6 +366,7 @@ def get_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def change_model_record(request, app_label: str, model_name: str, pk: str):
     boolean_values = {
         'true': True,
@@ -480,6 +494,7 @@ def change_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def add_model_record(request, app_label: str, model_name: str):
     boolean_values = {
         'true': True,
@@ -642,6 +657,7 @@ def add_model_record(request, app_label: str, model_name: str):
     }
 )
 @api_view(['GET'])
+@permission_classes([IsAdminUser])
 def get_model_listview(request, app_label: str, model_name: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -722,6 +738,7 @@ def get_model_listview(request, app_label: str, model_name: str):
     }
 )
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def custom_action_view(request, app_label: str, model_name: str, func: str):
     try:
         body = request.data
@@ -743,6 +760,7 @@ def custom_action_view(request, app_label: str, model_name: str, func: str):
         )
     
 @api_view(['GET'])
+@permission_classes([IsAdminUser])
 def get_inline_listview(request, parent_app_label: str, parent_model_name: str):
     try:
         model = get_model(f'{parent_app_label}.{parent_model_name}')
@@ -822,5 +840,171 @@ def verify_cloudflare_token(request):
         return Response(transform_dict_to_camel_case({
             'is_valid': False
         }), status=status.HTTP_400_BAD_REQUEST)
+    
+
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            description=GET_WORKER_QUEUES_DOC
+        ),
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_worker_queues(request):
+    try:
+        queues = get_queue_list()
+
+        return Response({
+            'queues': queues
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        log.error(f'Error retrieving worker queues: {str(e)}')
+
+        return Response({
+            'queues': []
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            description=GET_FAILED_QUEUED_JOBS_DOC
+        ),
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_failed_queued_jobs(request, queue_name: str):
+    try:
+        jobs = get_failed_jobs(queue_name)
+        serialized_jobs = QueuedJobSerializer(jobs, many=True).data
+
+        return Response({
+            'failed_jobs': {
+                'results': serialized_jobs,
+                'count': len(jobs),
+                'table_fields': ['id', 'created_at', 'enqueued_at', 'ended_at', 'callable']
+            }
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        log.error(f'Error retrieving queue failed jobs for {queue_name}: {str(e)}')
+
+        return Response({
+            'failed_jobs': {
+                'results': [],
+                'count': 0,
+                'table_fields': ['id', 'created_at', 'enqueued_at', 'ended_at', 'callable']
+            }
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            description=GET_QUEUED_JOB_DOC
+        ),
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_queued_job(request, queue_name: str, job_id: str):
+    try:
+        job = get_job(queue_name, job_id)
+
+        return Response({
+            'job': QueuedJobSerializer(job).data,
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        log.error(f'Error retrieving job id {job_id} from queue {queue_name}: {str(e)}')
+
+        return Response({
+            'job': None,
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+@extend_schema(
+    responses={
+        status.HTTP_201_CREATED: OpenApiResponse(
+            description=REQUEUE_FAILED_JOB_DOC
+        ),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def requeue_failed_jobs(request):
+    try:
+        body = request.data
+        data = RequeueOrDeleteJobsBodySerializer(data=body)
+        if not data.is_valid():
+            return Response({
+                'success': False,
+                'message': 'Invalid request'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        requeue_jobs(body.get('queue_name'), body.get('job_ids'))
+
+        jobs_ids_str = '<ul class="list-disc">'
+        for job_id in body.get('job_ids'):
+            jobs_ids_str += f'<li>{job_id}</li>'
+        jobs_ids_str += '</ul>'
+
+        return Response({
+            'success': True,
+            'message': f"""
+                <p>Successfully requeued jobs for queue {body.get('queue_name')}:</p>
+                {jobs_ids_str}
+            """
+
+        }, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        log.error(f'Error requeueing jobs for {body}: {str(e)}')
+
+        return Response({
+            'success': False,
+            'message': f'Something went wrong with your request'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            description=GET_QUEUED_JOB_DOC
+        ),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def delete_queued_jobs(request):
+    try:
+        body = request.data
+        data = RequeueOrDeleteJobsBodySerializer(data=body)
+        if not data.is_valid():
+            return Response({
+                'success': False,
+                'message': 'Invalid request'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        delete_jobs(body.get('queue_name'), body.get('job_ids'))
+
+        jobs_ids_str = '<ul class="list-disc">'
+        for job_id in body.get('job_ids'):
+            jobs_ids_str += f'<li>{job_id}</li>'
+        jobs_ids_str += '</ul>'
+
+        return Response({
+            'success': True,
+            'message': f"""
+                <p>Successfully deleted jobs for queue {body.get('queue_name')}:</p>
+                {jobs_ids_str}
+            """
+
+        }, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        log.error(f'Error deleting jobs for {body}: {str(e)}')
+
+        return Response({
+            'success': False,
+            'message': f'Something went wrong with your request'
+        }, status=status.HTTP_400_BAD_REQUEST)

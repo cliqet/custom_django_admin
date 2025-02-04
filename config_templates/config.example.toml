@@ -132,6 +132,9 @@
   # String. Brand name which appears in email header and footer
   brand_name = ''
 
+  # Required string. The api token to access rq stats
+  rq_api_token = ''
+
 
 [logging_config]
   # Handlers to use for logging
