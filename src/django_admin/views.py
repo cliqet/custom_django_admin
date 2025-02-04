@@ -20,7 +20,13 @@ from rest_framework.serializers import Serializer
 from django_admin.decorators import has_model_permission
 from django_admin.permissions import has_user_permission
 from services.cloudflare import verify_token
-from services.queue_service import get_failed_jobs, get_job, get_queue_list, requeue_job
+from services.queue_service import (
+    delete_jobs,
+    get_failed_jobs,
+    get_job,
+    get_queue_list,
+    requeue_jobs,
+)
 
 from .actions import ACTIONS
 from .configuration import APP_LIST_CONFIG_OVERRIDE
@@ -56,7 +62,7 @@ from .serializers import (
     ModelFieldSerializer,
     PermissionSerializer,
     QueuedJobSerializer,
-    RequeueJobBodySerializer,
+    RequeueOrDeleteJobsBodySerializer,
     VerifyTokenBodySerializer,
 )
 from .util_models import (
@@ -927,24 +933,76 @@ def get_queued_job(request, queue_name: str, job_id: str):
 )
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
-def requeue_failed_job(request):
+def requeue_failed_jobs(request):
     try:
         body = request.data
-        data = RequeueJobBodySerializer(data=body)
+        data = RequeueOrDeleteJobsBodySerializer(data=body)
         if not data.is_valid():
             return Response({
                 'success': False,
                 'message': 'Invalid request'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        requeue_job(body.get('queue_name'), body.get('job_id'))
+        requeue_jobs(body.get('queue_name'), body.get('job_ids'))
+
+        jobs_ids_str = '<ul class="list-disc">'
+        for job_id in body.get('job_ids'):
+            jobs_ids_str += f'<li>{job_id}</li>'
+        jobs_ids_str += '</ul>'
 
         return Response({
             'success': True,
-            'message': f'Successfully requeued job {body.get('job_id')} for queue {body.get('queue_name')}'
+            'message': f"""
+                <p>Successfully requeued jobs for queue {body.get('queue_name')}:</p>
+                {jobs_ids_str}
+            """
+
         }, status=status.HTTP_201_CREATED)
     except Exception as e:
-        log.error(f'Error requeueing job for {body}: {str(e)}')
+        log.error(f'Error requeueing jobs for {body}: {str(e)}')
+
+        return Response({
+            'success': False,
+            'message': f'Something went wrong with your request'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            description=GET_QUEUED_JOB_DOC
+        ),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def delete_queued_jobs(request):
+    try:
+        body = request.data
+        data = RequeueOrDeleteJobsBodySerializer(data=body)
+        if not data.is_valid():
+            return Response({
+                'success': False,
+                'message': 'Invalid request'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        delete_jobs(body.get('queue_name'), body.get('job_ids'))
+
+        jobs_ids_str = '<ul class="list-disc">'
+        for job_id in body.get('job_ids'):
+            jobs_ids_str += f'<li>{job_id}</li>'
+        jobs_ids_str += '</ul>'
+
+        return Response({
+            'success': True,
+            'message': f"""
+                <p>Successfully deleted jobs for queue {body.get('queue_name')}:</p>
+                {jobs_ids_str}
+            """
+
+        }, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        log.error(f'Error deleting jobs for {body}: {str(e)}')
 
         return Response({
             'success': False,

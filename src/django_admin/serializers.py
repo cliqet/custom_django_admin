@@ -238,7 +238,8 @@ class QueuedJobSerializer(serializers.Serializer):
     execution_info = serializers.CharField()
 
 
-class RequeueJobBodySerializer(serializers.Serializer):
+
+class RequeueOrDeleteJobsBodySerializer(serializers.Serializer):
     queue_name = serializers.CharField()
-    job_id = serializers.CharField()
+    job_ids = serializers.ListField(child=serializers.CharField())
 

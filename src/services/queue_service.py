@@ -86,14 +86,25 @@ def get_job(queue_name: str, job_id: str) -> dict:
     job = Job.fetch(job_id, connection=redis_conn)
     return build_job_dict(job)
 
-def requeue_job(queue_name: str, job_id: str) -> None:
+def requeue_jobs(queue_name: str, job_ids: list[str]) -> None:
     redis_conn = django_rq.get_connection(queue_name)
 
     queue = Queue(queue_name, connection=redis_conn)
     registry = queue.failed_job_registry
     for failed_job_id in registry.get_job_ids():
-        if failed_job_id == job_id:
-            registry.requeue(job_id)
-            break
+        if failed_job_id in job_ids:
+            registry.requeue(failed_job_id)
 
-    log.info(f'Requeued job {job_id} for queue {queue_name}')
+    log.info(f'Requeued jobs {job_ids} for queue {queue_name}')
+
+def delete_jobs(queue_name: str, job_ids: list[str]) -> None:
+    redis_conn = django_rq.get_connection(queue_name)
+    queue = django_rq.get_queue(queue_name)
+    failed_job_registry = FailedJobRegistry(queue=queue)
+
+    for job_id in job_ids:
+        job = Job.fetch(job_id, connection=redis_conn)
+        job.delete()
+        failed_job_registry.remove(job_id)
+
+    log.info(f'Deleted jobs {job_ids} for queue {queue_name}')

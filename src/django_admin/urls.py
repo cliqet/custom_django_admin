@@ -4,6 +4,7 @@ from .views import (
     add_model_record,
     change_model_record,
     custom_action_view,
+    delete_queued_jobs,
     get_apps,
     get_content_types,
     get_failed_queued_jobs,
@@ -18,7 +19,7 @@ from .views import (
     get_permissions,
     get_queued_job,
     get_worker_queues,
-    requeue_failed_job,
+    requeue_failed_jobs,
     verify_cloudflare_token,
 )
 
@@ -41,6 +42,7 @@ urlpatterns = [
     path('verify-cloudflare-token', verify_cloudflare_token, name='verify_cloudflare_token'),
     path('worker-queues', get_worker_queues, name='get_worker_queues'),
     path('worker-failed-jobs/<str:queue_name>', get_failed_queued_jobs, name='get_failed_queued_jobs'),
-    path('worker-jobs/requeue', requeue_failed_job, name='requeue_failed_job'),
+    path('worker-jobs/requeue', requeue_failed_jobs, name='requeue_failed_jobs'),
+    path('worker-jobs/delete', delete_queued_jobs, name='delete_queued_jobs'),
     path('worker-jobs/<str:queue_name>/<str:job_id>', get_queued_job, name='get_queued_job'),
 ]
