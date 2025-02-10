@@ -37,6 +37,8 @@ from .docs import (
     ADD_MODEL_RECORD_DOC,
     CHANGE_MODEL_RECORD_DOC,
     CUSTOM_ACTION_VIEW_DOC,
+    DELETE_MODEL_RECORD_DOC,
+    DELETE_MODEL_RECORD_ERROR_DOC,
     GET_APPS_DOC,
     GET_CONTENT_TYPES_DOC,
     GET_FAILED_QUEUED_JOBS_DOC,
@@ -474,6 +476,41 @@ def change_model_record(request, app_label: str, model_name: str, pk: str):
             'message': 'Invalid data',
             'validation_error': error_messages
         }, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        log.error(f'Error: {str(e)}')
+
+        return Response({
+            'message': str(e),
+            'has_error': True
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@extend_schema(
+    responses={
+        status.HTTP_202_ACCEPTED: OpenApiResponse(
+            description=DELETE_MODEL_RECORD_DOC
+        ),
+        status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+            description=DELETE_MODEL_RECORD_ERROR_DOC
+        ),
+    }
+)
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def delete_model_record(request, app_label: str, model_name: str, pk: str):
+    try:
+        model = get_model(f'{app_label}.{model_name}')
+
+        has_permission, response = has_user_permission(request, model, 'delete')
+        if not has_permission:
+            return response
+
+        instance = model.objects.get(pk=pk)
+        instance.delete()
+
+        return Response({
+            'message': f'Deleted record [{instance.__str__()}] with pk {pk} successfully'
+        }, status=status.HTTP_202_ACCEPTED)
     except Exception as e:
         log.error(f'Error: {str(e)}')
 

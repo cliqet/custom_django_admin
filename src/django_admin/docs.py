@@ -571,6 +571,28 @@ For other errors:
 ```
 """
 
+
+DELETE_MODEL_RECORD_DOC = """
+Deletes a model record
+Returns on successful change.
+```json
+{
+    "message": "Deleted record <record string> with pk <pk> successfully"
+}
+```
+"""
+
+DELETE_MODEL_RECORD_ERROR_DOC = """
+Returns when there is an error in deleting a model record
+```json
+{
+    'message': 'Something went wrong',
+    'has_error': True
+}
+```
+"""
+
+
 GET_MODEL_LISTVIEW_DOC = """
 Accepts a custom custom_search as a query parameter for search keyword.
 Returns a paginated list of records for the model.
