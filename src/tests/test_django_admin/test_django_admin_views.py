@@ -655,7 +655,7 @@ def test_delete_model_record_non_admin(api_client, non_admin_token, type_instanc
 
 def test_delete_model_record_admin_no_permission(api_client, limited_admin_token, type_instances):
     client = api_client()
-    print('INSTANCES LENGTH', len(type_instances))
+
     response = client.delete(
         reverse(
             'delete_model_record', 
