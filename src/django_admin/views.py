@@ -509,7 +509,7 @@ def delete_model_record(request, app_label: str, model_name: str, pk: str):
         instance.delete()
 
         return Response({
-            'message': f'Deleted record [{instance.__str__()}] with pk {instance.pk} successfully'
+            'message': f'Deleted record [{instance.__str__()}] with pk {pk} successfully'
         }, status=status.HTTP_202_ACCEPTED)
     except Exception as e:
         log.error(f'Error: {str(e)}')

@@ -640,3 +640,39 @@ def test_change_model_record_admin_valid(api_client, superuser_token, type_insta
         **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
     )
     assert response.status_code == 201
+
+def test_delete_model_record_non_admin(api_client, non_admin_token, type_instances):
+    client = api_client()
+
+    response = client.delete(
+        reverse(
+            'delete_model_record', 
+            kwargs={'app_label': 'demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+        ),
+        **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
+    )
+    assert response.status_code == 401
+
+def test_delete_model_record_admin_no_permission(api_client, limited_admin_token, type_instances):
+    client = api_client()
+    print('INSTANCES LENGTH', len(type_instances))
+    response = client.delete(
+        reverse(
+            'delete_model_record', 
+            kwargs={'app_label': 'demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+        ),
+        **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
+    )
+    assert response.status_code == 403
+
+def test_delete_model_record_admin_valid(api_client, superuser_token, type_instances):
+    client = api_client()
+
+    response = client.delete(
+        reverse(
+            'delete_model_record', 
+            kwargs={'app_label': 'demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+        ),
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 202
