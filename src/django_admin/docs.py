@@ -794,3 +794,27 @@ Returns on success
 }
 ```
 """
+
+
+QUERY_BUILDER_DOC = """
+Returns the list based on query post data.
+{
+    "count": 3,
+    "results": [
+        {
+            ...fields here
+        },
+        ...
+    ]
+}
+"""
+
+QUERY_BUILDER_ERROR_DOC = """
+On error, returns
+{
+    "count": 0,
+    "results": [],
+    "message": "Invalid data",
+    "validation_error": "error_messages"  # when there is a validation error only
+}
+"""
