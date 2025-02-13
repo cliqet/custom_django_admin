@@ -33,6 +33,15 @@ class IsFromUiRequest(BasePermission):
         raise PermissionDenied('Forbidden request')
     
 
+class IsSuperUser(BasePermission):
+    """
+        Custom permission class that grants access only to superusers.
+    """
+
+    def has_permission(self, request, view):
+        return request.user and request.user.is_superuser
+
+
 def has_user_permission(
         request: HttpRequest, 
         model: Model, 

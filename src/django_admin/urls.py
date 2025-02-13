@@ -21,6 +21,7 @@ from .views import (
     get_queued_job,
     get_worker_queues,
     query_builder,
+    raw_query,
     requeue_failed_jobs,
     verify_cloudflare_token,
 )
@@ -32,6 +33,7 @@ urlpatterns = [
     path('content-types', get_content_types, name='get_content_types'),
     path('groups', get_groups, name='get_groups'),
     path('query-builder', query_builder, name='query_builder'),
+    path('raw-query', raw_query, name='raw_query'),
     path('model-listview-action/<str:app_label>/<str:model_name>/<str:func>', custom_action_view, name='custom_action_view'),
     path('model-listview/<str:app_label>/<str:model_name>', get_model_listview, name='get_model_listview'),
     path('inline-listview/<str:parent_app_label>/<str:parent_model_name>', get_inline_listview, name='get_inline_listview'),

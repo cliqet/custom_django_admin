@@ -262,6 +262,10 @@ class QueryBuilderBodySerializer(serializers.Serializer):
             if not isinstance(condition[0], str) or not isinstance(condition[1], str):
                 raise serializers.ValidationError("The first two items in each condition must be strings.")
         return value
+    
+
+class RawQueryBodySerializer(serializers.Serializer):
+    query = serializers.CharField()
 
     
 
