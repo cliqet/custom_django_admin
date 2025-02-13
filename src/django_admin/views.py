@@ -899,7 +899,7 @@ def verify_cloudflare_token(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminUser, IsSuperUser])
 def get_worker_queues(request):
     try:
         queues = get_queue_list()
@@ -923,7 +923,7 @@ def get_worker_queues(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminUser, IsSuperUser])
 def get_failed_queued_jobs(request, queue_name: str):
     try:
         jobs = get_failed_jobs(queue_name)
@@ -956,7 +956,7 @@ def get_failed_queued_jobs(request, queue_name: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminUser, IsSuperUser])
 def get_queued_job(request, queue_name: str, job_id: str):
     try:
         job = get_job(queue_name, job_id)
@@ -982,7 +982,7 @@ def get_queued_job(request, queue_name: str, job_id: str):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminUser, IsSuperUser])
 def requeue_failed_jobs(request):
     try:
         body = request.data
@@ -1026,7 +1026,7 @@ def requeue_failed_jobs(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminUser, IsSuperUser])
 def delete_queued_jobs(request):
     try:
         body = request.data
@@ -1084,6 +1084,7 @@ def query_builder(request):
             model_name: str = body.get('model_name')
 
             model = get_model(f'{app_name}.{model_name.lower()}')
+            model_fields_data = get_model_fields_data(model)
 
             conditions: list[list[str | Any]] = body.get('conditions')
             if conditions:
@@ -1108,6 +1109,7 @@ def query_builder(request):
 
             return Response({
                 'count': len(results),
+                'fields': list(model_fields_data.keys()),
                 'results': serialized_results
             }, status=status.HTTP_202_ACCEPTED)
         
@@ -1118,6 +1120,7 @@ def query_builder(request):
         
         return Response({
             'count': 0,
+            'fields': [],
             'results': [],
             'message': 'Invalid data',
             'validation_error': error_messages
@@ -1127,6 +1130,7 @@ def query_builder(request):
 
         return Response({
             'count': 0,
+            'fields': [],
             'results': [],
             'message': f'Error with query builder: {str(e)}'
         }, status=status.HTTP_400_BAD_REQUEST)
