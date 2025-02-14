@@ -1157,6 +1157,8 @@ def raw_query(request):
         if serialized_body.is_valid():
             query = body.get('query')
 
+            # NOTE: Remove this check if you want no limitations to the query
+            # =============================================================
             query_lower = query.lower().strip()
             if re.search(r'\b(update|delete|drop|truncate|insert)\b', query_lower):
                 return Response({
@@ -1165,6 +1167,7 @@ def raw_query(request):
                     'results': [],
                     'message': 'Query is not allowed'
                 }, status=status.HTTP_400_BAD_REQUEST)
+            # =============================================================
 
             with connection.cursor() as cursor:
                 cursor.execute(query)  
