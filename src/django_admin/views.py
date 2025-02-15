@@ -883,6 +883,10 @@ def verify_cloudflare_token(request):
             return Response(transform_dict_to_camel_case({
                 'is_valid': is_valid
             }), status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(transform_dict_to_camel_case({
+                'is_valid': False
+            }), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         log.error(f'Error verifying cloudflare turnstile token: {str(e)}')
 

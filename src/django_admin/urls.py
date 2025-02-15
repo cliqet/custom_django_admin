@@ -45,7 +45,6 @@ urlpatterns = [
     path('model-fields/<str:app_label>/<str:model_name>', get_model_fields, name='get_model_fields'),
     path('model-admin-settings/<str:app_label>/<str:model_name>', get_model_admin_settings, name='get_model_admin_settings'),
     path('verify-cloudflare-token', verify_cloudflare_token, name='verify_cloudflare_token'),
-    path('verify-cloudflare-token', verify_cloudflare_token, name='verify_cloudflare_token'),
     path('worker-queues', get_worker_queues, name='get_worker_queues'),
     path('worker-failed-jobs/<str:queue_name>', get_failed_queued_jobs, name='get_failed_queued_jobs'),
     path('worker-jobs/requeue', requeue_failed_jobs, name='requeue_failed_jobs'),
