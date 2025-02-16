@@ -676,3 +676,70 @@ def test_delete_model_record_admin_valid(api_client, superuser_token, type_insta
         **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
     )
     assert response.status_code == 202
+
+
+def test_query_builder_non_admin(api_client, non_admin_token):
+    client = api_client()
+    data = {}
+
+    response = client.post(
+        reverse(
+            'query_builder', 
+        ),
+        data=data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
+    )
+    assert response.status_code == 401
+
+
+def test_query_builder_invalid_body(api_client, limited_admin_token):
+    client = api_client()
+    data = {
+        'invalid': 'body'
+    }
+
+    response = client.post(
+        reverse(
+            'query_builder', 
+        ),
+        data=data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
+    )
+    assert response.status_code == 400
+
+
+def test_query_builder_valid_body(api_client, limited_admin_token):
+    client = api_client()
+    data = {
+        "app_name": "demo",
+        "model_name": "DemoModel",
+        "conditions": [
+            [
+                "is_active", "equals", "True" 
+            ],
+            [
+                "ordering", "lt", "12" 
+            ]
+        ],
+        "orderings": [
+            "ordering"
+        ],
+        "query_limit": None
+    }
+
+    response = client.post(
+        reverse(
+            'query_builder', 
+        ),
+        data=data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
+    )
+    assert response.status_code == 202
+    data = response.data
+
+    assert 'count' in data
+    assert 'fields' in data
+    assert 'results' in data
