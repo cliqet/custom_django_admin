@@ -743,3 +743,89 @@ def test_query_builder_valid_body(api_client, limited_admin_token):
     assert 'count' in data
     assert 'fields' in data
     assert 'results' in data
+
+
+def test_raw_query_non_admin(api_client, non_admin_token):
+    client = api_client()
+    data = {}
+
+    response = client.post(
+        reverse(
+            'raw_query', 
+        ),
+        data=data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
+    )
+    assert response.status_code == 401
+
+
+def test_raw_query_non_superuser(api_client, limited_admin_token):
+    client = api_client()
+    data = {}
+
+    response = client.post(
+        reverse(
+            'raw_query', 
+        ),
+        data=data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
+    )
+    assert response.status_code == 403
+
+
+def test_raw_query_invalid_body(api_client, superuser_token):
+    client = api_client()
+    data = {
+        'invalid': 'body'
+    }
+
+    response = client.post(
+        reverse(
+            'raw_query', 
+        ),
+        data=data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 400
+
+
+def test_raw_query_valid_body_invalid_query(api_client, superuser_token):
+    client = api_client()
+    data = {
+        'query': 'DROP TABLE demo_demomodel;'
+    }
+
+    response = client.post(
+        reverse(
+            'raw_query', 
+        ),
+        data=data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 400
+
+
+def test_raw_query_valid_body(api_client, superuser_token):
+    client = api_client()
+    data = {
+        'query': 'SELECT 1;'
+    }
+
+    response = client.post(
+        reverse(
+            'raw_query', 
+        ),
+        data=data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 202
+    data = response.data
+
+    assert 'count' in data
+    assert 'fields' in data
+    assert 'results' in data
