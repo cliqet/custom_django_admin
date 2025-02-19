@@ -3,6 +3,7 @@ from enum import Enum
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group
+from django.db import models
 
 # from django.contrib.sessions.models import Session
 from rest_framework_simplejwt.token_blacklist.models import (
@@ -75,10 +76,6 @@ class CustomTabularInline(metaclass=CustomTabularInlineBase):
         for field_name, value in kwargs.items():
             setattr(self, field_name, value)
 
-    def get_queryset(self):
-        model = get_model(f'{self.app_label}.{self.model_name}')
-        return model.objects.all()
-
 
 class BaseCustomInline(CustomTabularInline):
     """
@@ -103,9 +100,20 @@ class BaseCustomInline(CustomTabularInline):
     custom_change_link = ''
 
     # Override this if you want a custom queryset
-    def get_queryset(self):
-        # Call the parent's get_queryset method
-        queryset = super().get_queryset()
+    # change_obj is the current record being changed in the detail page
+    def get_queryset(self, change_obj):
+        custom_inline_model = get_model(f'{self.app_label}.{self.model_name}')
+
+        queryset = custom_inline_model.objects.all()
+
+        for field in custom_inline_model._meta.get_fields():
+            if isinstance(field, models.ForeignKey) and field.related_model == change_obj.__class__:
+                fk_field = field
+                break
+
+        if fk_field:
+            # Filter the queryset based on the ForeignKey relationship
+            queryset = queryset.filter(**{fk_field.name: change_obj})
 
         return queryset
 

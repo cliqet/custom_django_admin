@@ -117,6 +117,6 @@ class CountryProfile(BaseModel):
     area = models.PositiveIntegerField(help_text='Enter area number')
 
     def __str__(self):
-        return self.country
+        return self.country.name
     
 

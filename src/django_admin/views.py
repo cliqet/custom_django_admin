@@ -809,7 +809,7 @@ def custom_action_view(request, app_label: str, model_name: str, func: str):
     
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
-def get_inline_listview(request, parent_app_label: str, parent_model_name: str):
+def get_inline_listview(request, parent_app_label: str, parent_model_name: str, change_obj_pk: str):
     try:
         model = get_model(f'{parent_app_label}.{parent_model_name}')
 
@@ -828,7 +828,9 @@ def get_inline_listview(request, parent_app_label: str, parent_model_name: str):
                 inline_class = inline()
                 break
 
-        queryset = inline_class.get_queryset()
+        change_obj = model.objects.get(pk=change_obj_pk)
+
+        queryset = inline_class.get_queryset(change_obj)
 
         inline_model = get_model(f'{inline_class.app_label}.{inline_class.model_name}')
         has_permission, response = has_user_permission(request, model, 'view')
