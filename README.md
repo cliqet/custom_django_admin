@@ -228,65 +228,49 @@ as it creates the format so that validation is applied to both the frontend and 
 #### Customizing the modeladmin
 
 Just like with `admin.ModelAdmin`, `BaseModelAdmin` supports the same setup
-for the frequently used properties. Below is an example of customizing `DemoModelAdmin`
+for the frequently used properties. Below is an example of customizing a model admin for the model Type `DemoModelAdmin`
 
 ```python
-class DemoModelAdmin(BaseModelAdmin):
-    list_display = [
-        'name', 'type', 'color', 'ordering', 'is_active', 'email', 'date', 'metadata', 'html'
-    ]
-    ordering = ['-name', 'type']
-    search_fields = ['name', 'email']
-    search_help_text = 'Search by name, email'
-    autocomplete_fields = ['type']
-    list_filter = ['color', 'type', 'is_active']
-    list_per_page = 5
-    custom_inlines = [CountryProfileCustomInline, DemoModelCustomInline]
+class TypeAdmin(BaseModelAdmin):
+    list_display = ['name']
+    list_display_links = ['name']
+    search_fields = ['name']
+    custom_inlines = [DemoModelCustomInline, TypeCustomInline, CountryProfileCustomInline]
     extra_inlines = ['sample_extra']
     fieldsets = (
         ('Section 1', {
-            'fields': (
-                'type', 'color', 'name', 'email', 'ordering', 'range_number',
-                'amount', 'comment', 'is_active'
-            ),
-        }),
-        ('Section 2', {
-            'fields': (
-                'date', 'time', 'last_log', 'classification', 'permissions',
-                'file', 'image', 'metadata', 'html'
-            ),
+            'fields': ('name',),
         }),
     )
 ```
 
 Notice that all  properties are just like in `admin.ModelAdmin` except 
-for `custom_inlines`, `extra_inlines` and `custom_change_link`. 
+for `custom_inlines`, `extra_inlines` and `custom_change_link`
 
 1. `custom_inlines`: This is just like inlines except that it takes a special kind 
 of tabularinline model `BaseCustomInline` which you need to inherit from when creating 
 inlines (tables aside from the current model). You can refer to `django_admin.admin` for what 
 properties are available. Below is an example of a custom inline
 ```python
-class CountryProfileCustomInline(BaseCustomInline):
+class DemoModelCustomInline(BaseCustomInline):
     app_label = 'demo'
-    model_name = 'countryprofile'
-    model_name_label = 'CountryProfile'
-    list_display = ['country', 'level', 'type', 'area']
-    list_display_links = ['country']
+    model_name = 'demomodel'
+    model_name_label = 'DemoModel'
+    list_display = ['name', 'type', 'color', 'ordering', 'is_active', 'email']
+    list_display_links = ['name']
     list_per_page = 5
+
+    # Using the change_obj to show only those that are related to the change object
+    def get_queryset(self, change_obj):
+        return DemoModel.objects.filter(type=change_obj)
 ```
 
 The difference between Django's inlines and BaseCustomInline is that with 
 BaseCustomInline, you can have inlines that are `NOT RELATED` to the current model.
 You can even have inlines of the same current model. It is up to you what inline 
-you want to show as long as you have a registered model in the admin. If you wanted to 
-show an inline of the current model but showing certain rows only based on field values,
-you can override the `get_queryset` of BaseCustomInline like the following:
-```python
-def get_queryset(self):
-    # Show only inactive rows for the inline
-    return DemoModel.objects.filter(is_active=False)
-```
+you want to show as long as you have a registered model in the admin. If you want to show 
+a table that is not related to the model, just override the `get_queryset()` method and 
+return any model queryset.
 
 
 2. `extra_inlines`: This property is to add additional content that 
