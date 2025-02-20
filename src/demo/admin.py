@@ -16,8 +16,24 @@ class CountryProfileCustomInline(BaseCustomInline):
     list_per_page = 5
     custom_change_link = f'{DASHBOARD_URL_PREFIX}/custom-change/country-profile'
 
+    def get_queryset(self, change_obj):
+        return CountryProfile.objects.all()
+
 
 # It is possible to have the same model as the inline
+class TypeCustomInline(BaseCustomInline):
+    app_label = 'demo'
+    model_name = 'type'
+    model_name_label = 'Type'
+    list_display = ['name']
+    list_display_links = ['name']
+    list_per_page = 5
+
+    # Sample of customizing the queryset of the inline
+    def get_queryset(self, change_obj):
+        return Type.objects.all()
+
+
 class DemoModelCustomInline(BaseCustomInline):
     app_label = 'demo'
     model_name = 'demomodel'
@@ -26,15 +42,17 @@ class DemoModelCustomInline(BaseCustomInline):
     list_display_links = ['name']
     list_per_page = 5
 
-    # Sample of customizing the queryset of the inline
-    def get_queryset(self):
-        return DemoModel.objects.filter(is_active=False)
+    # Using the change_obj to show only those that are related to the change object
+    def get_queryset(self, change_obj):
+        return DemoModel.objects.filter(type=change_obj)
 
 
 class TypeAdmin(BaseModelAdmin):
     list_display = ['name']
     list_display_links = ['name']
     search_fields = ['name']
+    custom_inlines = [DemoModelCustomInline, TypeCustomInline, CountryProfileCustomInline]
+    extra_inlines = ['sample_extra']
     fieldsets = (
         ('Section 1', {
             'fields': ('name',),
@@ -61,8 +79,6 @@ class DemoModelAdmin(BaseModelAdmin):
     autocomplete_fields = ['type']
     list_filter = ['color', 'type', 'is_active']
     list_per_page = 5
-    custom_inlines = [CountryProfileCustomInline, DemoModelCustomInline]
-    extra_inlines = ['sample_extra']
     fieldsets = (
         ('Section 1', {
             'fields': (
