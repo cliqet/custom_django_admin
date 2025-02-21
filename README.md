@@ -245,7 +245,7 @@ class TypeAdmin(BaseModelAdmin):
 ```
 
 Notice that all  properties are just like in `admin.ModelAdmin` except 
-for `custom_inlines`, `extra_inlines` and `custom_change_link`
+for `custom_inlines`, `extra_inlines`, `custom_change_link` and `custom_actions`
 
 1. `custom_inlines`: This is just like inlines except that it takes a special kind 
 of tabularinline model `BaseCustomInline` which you need to inherit from when creating 
@@ -288,6 +288,15 @@ class CountryProfileAdmin(BaseModelAdmin):
     autocomplete_fields = ['country']
     custom_change_link = f'{DASHBOARD_URL_PREFIX}/custom-change/country-profile'
 ```
+
+4. `custom_actions` - Instead of using `actions` like in the Django modeladmin, custom actions is the one used for adding different actions for the table. Looking at the example and default delete actions that come with `BaseModelAdmin`, you need to provide a list of dict with the following:
+```python
+custom_actions = [{
+    'func': CUSTOM_ACTIONS.DELETE_LISTVIEW.value,
+    'label': 'Delete selected records'
+}]
+```
+The dict should have the `func` which is the identifier of the action and a `label` which is the one shown in the dropdown menu. You would need to provide a view if you would like to add more custom actions. Just follow the pattern used by the delete listview builtin function. Refer to `django_admin.actions` for more details.
 
 
 ### Documenting the admin site
