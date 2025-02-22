@@ -2,7 +2,11 @@ from backend.settings.base import APP_MODE, DjangoSettings
 
 # from .constants import DASHBOARD_URL_PREFIX
 
-APP_LIST_CONFIG_OVERRIDE = {}
+APP_LIST_CONFIG_OVERRIDE = {
+    'saved_queries': {
+        'is_hidden': True,
+    }
+}
 
 # This example below shows how to override the app list so that you can use
 # a different url for the specific app.model.

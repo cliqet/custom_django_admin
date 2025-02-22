@@ -21,6 +21,7 @@ urlpatterns = [
 
     path('api/v1/django-admin/users/', include('users.urls')),
     path('api/v1/django-admin/model-docs/', include('documentation.urls')),
+    path('api/v1/django-admin/saved-queries/', include('saved_queries.urls')),
     path('api/v1/django-admin/', include('django_admin.urls')),
 
     # API documentation 

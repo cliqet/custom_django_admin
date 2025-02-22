@@ -39,7 +39,12 @@ class IsSuperUser(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_superuser
+        return (
+            request.user and 
+            request.user.is_staff and 
+            request.user.is_active and 
+            request.user.is_superuser
+        )
 
 
 def has_user_permission(

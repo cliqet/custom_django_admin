@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'django_admin',
     'users',
     'documentation',
+    'saved_queries',
     'demo', # For demo purposes only. Delete this!!!!!
 ]
 
