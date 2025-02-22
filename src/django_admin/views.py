@@ -150,8 +150,11 @@ def get_apps(request):
             if model_override.get('is_hidden'):
                 continue
             
-            new_model['admin_url'] = model_override.get('admin_url')
-            new_model['add_url'] = model_override.get('add_url')
+            # If url's were overridden
+            if model_override.get('admin_url'):
+                new_model['admin_url'] = model_override.get('admin_url')
+            if model_override.get('add_url'):
+                new_model['add_url'] = model_override.get('add_url')
             new_model_list.append(new_model)
 
         new_app['models'] = new_model_list

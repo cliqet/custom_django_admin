@@ -9,6 +9,14 @@ APP_LIST_CONFIG_OVERRIDE = {}
 # If you want to override every app and models you registered, better to 
 # create your own custom views for each and do not use the provided generic routes
 # in the UI
+# Optional overrides for apps
+# - app_url
+# - is_hidden
+# - models
+#
+# Optional overrides for models
+# - admin_url
+# - add_url
 
 """
 Example of overriding:
