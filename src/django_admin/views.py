@@ -106,38 +106,59 @@ log = logging.getLogger(__name__)
 def get_apps(request):
     app_list = site.get_app_list(request)
 
+    # Stores the final app list to return
+    new_app_list = []
+
     # Replace /admin with custom admin url prefix
     for app in app_list:
+        new_app = app
+        app_label = new_app.get('app_label')
+
+        # Whether the app has an override config
+        app_override = APP_LIST_CONFIG_OVERRIDE.get(app_label)
+
         app['app_url'] = f'{DASHBOARD_URL_PREFIX}{app.get('app_url')[6:-1]}'
 
-        app_override = APP_LIST_CONFIG_OVERRIDE.get(app.get('app_label'))
+        # Check if app should not be included in app list
+        if app_override and app_override.get('is_hidden'):
+            continue
 
-        # Check if app has override
-        if app_override:
-            app['app_url'] = app_override.get('app_url')
+        if app_override and not app_override.get('is_hidden'):
+            new_app['app_url'] = app_override.get('app_url')
 
-        for model in app.get('models'):
-            # Check if model in app has override
+        # Store updated models to include in app list
+        new_model_list = []
+
+        for model in new_app.get('models'):
+            new_model = model
+            model_name = new_model.get('object_name')
+            new_model['admin_url'] = f'{DASHBOARD_URL_PREFIX}{new_model.get('admin_url')[6:-1]}'
+            new_model['add_url'] = f'{DASHBOARD_URL_PREFIX}{new_model.get('add_url')[6:-1]}'
+
+            # Check if model in app has a config to override
+            model_override = None
             if app_override:
-                model_override = app_override.get('models', {}).get(model.get('object_name'))
-            else:
-                model_override = None
+                model_override = app_override.get('models', {}).get(model_name)
+
+            # No config for model so just add it to the app's model list
+            if not model_override:
+                new_model_list.append(new_model)
+                continue
+
+            # Guaranteed that there is a model override when it reaches this point
+            # Model should be hidden so do not add it to the list
+            if model_override.get('is_hidden'):
+                continue
             
-            if model.get('admin_url'):
-                model['admin_url'] = f'{DASHBOARD_URL_PREFIX}{model.get('admin_url')[6:-1]}'
+            new_model['admin_url'] = model_override.get('admin_url')
+            new_model['add_url'] = model_override.get('add_url')
+            new_model_list.append(new_model)
 
-            # If app.model has override
-            if app_override and model_override:
-                model['admin_url'] = model_override.get('admin_url')
-
-            if model.get('add_url'):
-                model['add_url'] = f'{DASHBOARD_URL_PREFIX}{model.get('add_url')[6:-1]}'
-
-            # If app.model has override
-            if app_override and model_override:
-                model['add_url'] = model_override.get('add_url')
+        new_app['models'] = new_model_list
+    
+        new_app_list.append(new_app)
     return Response(transform_dict_to_camel_case({
-        'app_list': AppSerializer(app_list, many=True).data
+        'app_list': AppSerializer(new_app_list, many=True).data
     }), status=status.HTTP_200_OK)
 
 
