@@ -14,6 +14,7 @@ from .constants import SAVED_QUERY_BUILDERS_CACHE_PREFIX
 from .docs import (
     ADD_QUERY_BUILDER_DOC,
     CHANGE_QUERY_BUILDER_DOC,
+    DELETE_QUERY_BUILDER_DOC,
     GET_ALL_QUERY_BUILDERS_DOC,
 )
 from .models import SavedQueryBuilder
@@ -104,7 +105,6 @@ def add_query_builder(request):
     request=SavedQueryBuilderPostBodySerializer,
     responses={
         status.HTTP_201_CREATED: OpenApiResponse(
-            response=SavedQueryBuilderSerializer,
             description=CHANGE_QUERY_BUILDER_DOC
         ),
     }
@@ -151,6 +151,37 @@ def change_query_builder(request, id: int):
         }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         log.error(f'Failed to change query builder: {str(e)}')
+
+        return Response({
+            'message': 'Something went wrong'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(
+    responses={
+        status.HTTP_202_ACCEPTED: OpenApiResponse(
+            description=DELETE_QUERY_BUILDER_DOC
+        ),
+    }
+)
+@api_view(['DELETE'])
+@permission_classes([IsSuperUser])
+def delete_query_builder(request, id: int):
+    try:
+        saved_query = SavedQueryBuilder.objects.get(id=id)
+        saved_query.delete()
+
+        return Response({
+            'message': f'Successfully deleted query with id {id}'
+        }, status=status.HTTP_202_ACCEPTED)
+    except SavedQueryBuilder.DoesNotExist as e:
+        log.error(f'Failed to delete query builder: {str(e)}')
+
+        return Response({
+            'message': f'Query with id {id} does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        log.error(f'Failed to delete query builder: {str(e)}')
 
         return Response({
             'message': 'Something went wrong'

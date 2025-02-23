@@ -45,3 +45,12 @@ Save query from a query builder. Returns:
 }
 ```
 """
+
+DELETE_QUERY_BUILDER_DOC = """
+Save query from a query builder. Returns:
+```json
+{
+    "message": "Successfully deleted query with id <id>"
+}
+```
+"""
