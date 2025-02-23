@@ -36,3 +36,12 @@ Save query from a query builder. Returns:
 }
 ```
 """
+
+CHANGE_QUERY_BUILDER_DOC = """
+Save query from a query builder. Returns:
+```json
+{
+    "message": "Successfully changed query with id <id>"
+}
+```
+"""
