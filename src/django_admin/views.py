@@ -1,7 +1,5 @@
 import json
 import logging
-import re
-from typing import Any
 
 from django.contrib import admin
 from django.contrib.admin import site
@@ -10,8 +8,7 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.db import connection
-from django.db.models import Model, Q, QuerySet
+from django.db.models import Model, Q
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -54,8 +51,6 @@ from .docs import (
     GET_PERMISSIONS_DOC,
     GET_QUEUED_JOB_DOC,
     GET_WORKER_QUEUES_DOC,
-    QUERY_BUILDER_DOC,
-    QUERY_BUILDER_ERROR_DOC,
     REQUEUE_FAILED_JOB_DOC,
     VERIFY_CLOUDFLARE_TOKEN_DOC,
     VERIFY_CLOUDFLARE_TOKEN_ERROR_DOC,
@@ -68,9 +63,7 @@ from .serializers import (
     ModelAdminSettingsSerializer,
     ModelFieldSerializer,
     PermissionSerializer,
-    QueryBuilderBodySerializer,
     QueuedJobSerializer,
-    RawQueryBodySerializer,
     RequeueOrDeleteJobsBodySerializer,
     VerifyTokenBodySerializer,
 )
@@ -84,11 +77,7 @@ from .util_serializers import (
     create_post_body_model_serializer,
     get_dynamic_serializer,
 )
-from .utils import (
-    build_conditions_query,
-    serialize_model_admin,
-    transform_conditions_query,
-)
+from .utils import serialize_model_admin
 
 log = logging.getLogger(__name__)
 
@@ -106,38 +95,62 @@ log = logging.getLogger(__name__)
 def get_apps(request):
     app_list = site.get_app_list(request)
 
+    # Stores the final app list to return
+    new_app_list = []
+
     # Replace /admin with custom admin url prefix
     for app in app_list:
+        new_app = app
+        app_label = new_app.get('app_label')
+
+        # Whether the app has an override config
+        app_override = APP_LIST_CONFIG_OVERRIDE.get(app_label)
+
         app['app_url'] = f'{DASHBOARD_URL_PREFIX}{app.get('app_url')[6:-1]}'
 
-        app_override = APP_LIST_CONFIG_OVERRIDE.get(app.get('app_label'))
+        # Check if app should not be included in app list
+        if app_override and app_override.get('is_hidden'):
+            continue
 
-        # Check if app has override
-        if app_override:
-            app['app_url'] = app_override.get('app_url')
+        if app_override and not app_override.get('is_hidden'):
+            new_app['app_url'] = app_override.get('app_url')
 
-        for model in app.get('models'):
-            # Check if model in app has override
+        # Store updated models to include in app list
+        new_model_list = []
+
+        for model in new_app.get('models'):
+            new_model = model
+            model_name = new_model.get('object_name')
+            new_model['admin_url'] = f'{DASHBOARD_URL_PREFIX}{new_model.get('admin_url')[6:-1]}'
+            new_model['add_url'] = f'{DASHBOARD_URL_PREFIX}{new_model.get('add_url')[6:-1]}'
+
+            # Check if model in app has a config to override
+            model_override = None
             if app_override:
-                model_override = app_override.get('models', {}).get(model.get('object_name'))
-            else:
-                model_override = None
+                model_override = app_override.get('models', {}).get(model_name)
+
+            # No config for model so just add it to the app's model list
+            if not model_override:
+                new_model_list.append(new_model)
+                continue
+
+            # Guaranteed that there is a model override when it reaches this point
+            # Model should be hidden so do not add it to the list
+            if model_override.get('is_hidden'):
+                continue
             
-            if model.get('admin_url'):
-                model['admin_url'] = f'{DASHBOARD_URL_PREFIX}{model.get('admin_url')[6:-1]}'
+            # If url's were overridden
+            if model_override.get('admin_url'):
+                new_model['admin_url'] = model_override.get('admin_url')
+            if model_override.get('add_url'):
+                new_model['add_url'] = model_override.get('add_url')
+            new_model_list.append(new_model)
 
-            # If app.model has override
-            if app_override and model_override:
-                model['admin_url'] = model_override.get('admin_url')
-
-            if model.get('add_url'):
-                model['add_url'] = f'{DASHBOARD_URL_PREFIX}{model.get('add_url')[6:-1]}'
-
-            # If app.model has override
-            if app_override and model_override:
-                model['add_url'] = model_override.get('add_url')
+        new_app['models'] = new_model_list
+    
+        new_app_list.append(new_app)
     return Response(transform_dict_to_camel_case({
-        'app_list': AppSerializer(app_list, many=True).data
+        'app_list': AppSerializer(new_app_list, many=True).data
     }), status=status.HTTP_200_OK)
 
 
@@ -1067,149 +1080,3 @@ def delete_queued_jobs(request):
         }, status=status.HTTP_400_BAD_REQUEST)
     
 
-@extend_schema(
-    request=QueryBuilderBodySerializer,
-    responses={
-        status.HTTP_202_ACCEPTED: OpenApiResponse(
-            description=QUERY_BUILDER_DOC
-        ),
-        status.HTTP_400_BAD_REQUEST: OpenApiResponse(
-            description=QUERY_BUILDER_ERROR_DOC
-        ),
-    }
-)
-@api_view(['POST'])
-@permission_classes([IsAdminUser])
-def query_builder(request):
-    try:
-        body = request.data
-        serialized_body = QueryBuilderBodySerializer(data=body)
-
-        if serialized_body.is_valid():
-            app_name: str = body.get('app_name')
-            model_name: str = body.get('model_name')
-
-            model = get_model(f'{app_name}.{model_name.lower()}')
-            model_fields_data = get_model_fields_data(model)
-
-            conditions: list[list[str | Any]] = body.get('conditions')
-            if conditions:
-                model_fields_data = get_model_fields_data(model)
-                transformed_conditions = transform_conditions_query(conditions, model_fields_data)
-
-                query = build_conditions_query(transformed_conditions)
-                results: QuerySet = model.objects.filter(query)
-            else:
-                results = model.objects.all()
-
-            orderings: list[str] = body.get('orderings')
-            for order in orderings:
-                results = results.order_by(order)
-
-            query_limit = body.get('query_limit')
-            if query_limit:
-                results = results[:query_limit]
-
-            model_serializer = get_dynamic_serializer(app_name, model)
-            serialized_results = model_serializer(results, many=True).data
-
-            return Response({
-                'count': len(results),
-                'fields': list(model_fields_data.keys()),
-                'results': serialized_results
-            }, status=status.HTTP_202_ACCEPTED)
-        
-        # If there are serialization errors
-        error_messages = {}
-        for field, errors in serialized_body.errors.items():
-            error_messages[field] = [str(error) for error in errors]
-        
-        return Response({
-            'count': 0,
-            'fields': [],
-            'results': [],
-            'message': 'Invalid data',
-            'validation_error': error_messages
-        }, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        log.error(f'Error with query builder: {str(e)}')
-
-        return Response({
-            'count': 0,
-            'fields': [],
-            'results': [],
-            'message': f'Error with query builder: {str(e)}'
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-
-@extend_schema(
-    request=RawQueryBodySerializer,
-    responses={
-        status.HTTP_202_ACCEPTED: OpenApiResponse(
-            description=QUERY_BUILDER_DOC
-        ),
-        status.HTTP_400_BAD_REQUEST: OpenApiResponse(
-            description=QUERY_BUILDER_ERROR_DOC
-        ),
-    }
-)
-@api_view(['POST'])
-@permission_classes([IsAdminUser, IsSuperUser])
-def raw_query(request):
-    try:
-        body = request.data
-        serialized_body = RawQueryBodySerializer(data=body)
-
-        if serialized_body.is_valid():
-            query = body.get('query')
-
-            # NOTE: Remove this check if you want no limitations to the query
-            # =============================================================
-            query_lower = query.lower().strip()
-            if re.search(r'\b(update|delete|drop|truncate|insert)\b', query_lower):
-                return Response({
-                    'count': 0,
-                    'fields': [],
-                    'results': [],
-                    'message': 'Query is not allowed'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            # =============================================================
-
-            with connection.cursor() as cursor:
-                cursor.execute(query)  
-                columns = [col[0] for col in cursor.description]
-                
-                results = cursor.fetchall()  
-
-                # Format results as a list of dictionaries
-                response_data = [
-                    dict(zip(columns, row)) for row in results
-                ]
-
-            return Response({
-                'count': len(results),
-                'fields': columns,
-                'results': response_data,
-            }, status=status.HTTP_202_ACCEPTED)
-        
-        # If there are serialization errors
-        error_messages = {}
-        for field, errors in serialized_body.errors.items():
-            error_messages[field] = [str(error) for error in errors]
-        
-        return Response({
-            'count': 0,
-            'fields': [],
-            'results': [],
-            'message': 'Invalid data',
-            'validation_error': error_messages
-        }, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        log.error(f'Error with query builder: {str(e)}')
-
-        return Response({
-            'count': 0,
-            'fields': [],
-            'results': [],
-            'message': f'Error with query builder: {str(e)}'
-        }, status=status.HTTP_400_BAD_REQUEST)
