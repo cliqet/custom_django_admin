@@ -16,7 +16,7 @@ from django_admin.permissions import IsSuperUser
 from django_admin.util_models import get_model, get_model_fields_data
 from django_admin.util_serializers import get_dynamic_serializer
 
-from .constants import SAVED_QUERY_BUILDERS_CACHE_PREFIX
+from .constants import SAVED_QUERY_BUILDERS_CACHE_PREFIX, SAVED_RAW_QUERIES_CACHE_PREFIX
 from .docs import (
     ADD_QUERY_BUILDER_DOC,
     CHANGE_QUERY_BUILDER_DOC,
@@ -210,6 +210,34 @@ def get_all_query_builders(request):
     serialized_queries = SavedQueryBuilderSerializer(queries, many=True).data
 
     cache.set(SAVED_QUERY_BUILDERS_CACHE_PREFIX, serialized_queries, CACHE_BY_DAY)
+
+    return Response({
+        'queries': serialized_queries
+    }, status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            response=SavedQueryBuilderSerializer,
+            description=GET_ALL_QUERY_BUILDERS_DOC
+        ),
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsSuperUser])
+def get_all_raw_queries(request):
+    cached_data = cache.get(SAVED_RAW_QUERIES_CACHE_PREFIX)
+
+    if cached_data:
+        return Response({
+            'queries': cached_data
+        }, status=status.HTTP_200_OK)
+    
+    queries = SavedRawQuery.objects.all()
+    serialized_queries = SavedRawQuerySerializer(queries, many=True).data
+
+    cache.set(SAVED_RAW_QUERIES_CACHE_PREFIX, serialized_queries, CACHE_BY_DAY)
 
     return Response({
         'queries': serialized_queries

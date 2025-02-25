@@ -8,6 +8,7 @@ from .views import (
     delete_query_builder,
     delete_raw_query,
     get_all_query_builders,
+    get_all_raw_queries,
     query_builder,
     raw_query,
 )
@@ -22,4 +23,5 @@ urlpatterns = [
     path('raw-query/change/<int:id>', change_raw_query, name='change_raw_query'),
     path('raw-query/delete/<int:id>', delete_raw_query, name='delete_raw_query'),
     path('raw-query/add', add_raw_query, name='add_raw_query'),
+    path('raw-query', get_all_raw_queries, name='get_all_raw_queries'),
 ]
