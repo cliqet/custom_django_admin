@@ -25,12 +25,14 @@ from .docs import (
     QUERY_BUILDER_DOC,
     QUERY_BUILDER_ERROR_DOC,
 )
-from .models import SavedQueryBuilder
+from .models import SavedQueryBuilder, SavedRawQuery
 from .serializers import (
     QueryBuilderBodySerializer,
     RawQueryBodySerializer,
     SavedQueryBuilderPostBodySerializer,
     SavedQueryBuilderSerializer,
+    SavedRawQueryPostBodySerializer,
+    SavedRawQuerySerializer,
 )
 from .utils import (
     build_conditions_query,
@@ -343,6 +345,141 @@ def delete_query_builder(request, id: int):
         }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         log.error(f'Failed to delete query builder: {str(e)}')
+
+        return Response({
+            'message': 'Something went wrong'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@extend_schema(
+    request=SavedRawQueryPostBodySerializer,
+    responses={
+        status.HTTP_201_CREATED: OpenApiResponse(
+            response=SavedRawQuerySerializer,
+            description=ADD_QUERY_BUILDER_DOC
+        ),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsSuperUser])
+def add_raw_query(request):
+    try:
+        body = request.data
+        serialized_body = SavedRawQuerySerializer(data=body)
+        error_messages = {}
+
+        if serialized_body.is_valid():
+            SavedRawQuery.objects.create(**body)
+
+            return Response({
+                'message': f'Successfully added query {body.get("name")}'
+            }, status=status.HTTP_201_CREATED)
+        else:
+            # If there are serialization errors
+            for field, errors in serialized_body.errors.items():
+                error_messages[field] = [str(error) for error in errors]
+
+            log.error(f'Serialization error: {error_messages}')
+        
+            return Response({
+                'message': 'Invalid data',
+                'validation_error': error_messages
+            }, status=status.HTTP_400_BAD_REQUEST)
+    except IntegrityError as e:
+        log.error(f'Failed to save raw query: {str(e)}')
+
+        return Response({
+            'message': f'A record with {body.get("name")} already exists'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        log.error(f'Failed to save query builder: {str(e)}')
+
+        return Response({
+            'message': 'Something went wrong'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@extend_schema(
+    request=SavedRawQueryPostBodySerializer,
+    responses={
+        status.HTTP_201_CREATED: OpenApiResponse(
+            description=CHANGE_QUERY_BUILDER_DOC
+        ),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsSuperUser])
+def change_raw_query(request, id: int):
+    try:
+        body = request.data
+        serialized_body = SavedRawQueryPostBodySerializer(data=body)
+        error_messages = {}
+
+        if serialized_body.is_valid():
+            saved_query = SavedRawQuery.objects.get(id=id)
+            saved_query.name = body.get('name')
+            saved_query.query = body.get('query')
+            saved_query.save()
+
+            return Response({
+                'message': f'Successfully changed query with id {id}'
+            }, status=status.HTTP_201_CREATED)
+        else:
+            # If there are serialization errors
+            for field, errors in serialized_body.errors.items():
+                error_messages[field] = [str(error) for error in errors]
+
+            log.error(f'Serialization error: {error_messages}')
+        
+            return Response({
+                'message': 'Invalid request',
+                'validation_error': error_messages
+            }, status=status.HTTP_400_BAD_REQUEST)
+    except IntegrityError as e:
+        log.error(f'Failed to change raw query: {str(e)}')
+
+        return Response({
+            'message': f'A record with {body.get("name")} already exists'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    except SavedRawQuery.DoesNotExist as e:
+        log.error(f'Failed to change raw query: {str(e)}')
+
+        return Response({
+            'message': f'Query with id {id} does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        log.error(f'Failed to change raw query: {str(e)}')
+
+        return Response({
+            'message': 'Something went wrong'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(
+    responses={
+        status.HTTP_202_ACCEPTED: OpenApiResponse(
+            description=DELETE_QUERY_BUILDER_DOC
+        ),
+    }
+)
+@api_view(['DELETE'])
+@permission_classes([IsSuperUser])
+def delete_raw_query(request, id: int):
+    try:
+        saved_query = SavedRawQuery.objects.get(id=id)
+        saved_query.delete()
+
+        return Response({
+            'message': f'Successfully deleted query with id {id}'
+        }, status=status.HTTP_202_ACCEPTED)
+    except SavedRawQuery.DoesNotExist as e:
+        log.error(f'Failed to delete raw query: {str(e)}')
+
+        return Response({
+            'message': f'Query with id {id} does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        log.error(f'Failed to delete raw query: {str(e)}')
 
         return Response({
             'message': 'Something went wrong'
