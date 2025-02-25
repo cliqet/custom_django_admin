@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import SavedQueryBuilder
+from .models import SavedQueryBuilder, SavedRawQuery
 
 
 class QueryBuilderBodySerializer(serializers.Serializer):
@@ -36,4 +36,15 @@ class SavedQueryBuilderPostBodySerializer(serializers.Serializer):
 class SavedQueryBuilderSerializer(serializers.ModelSerializer):
     class Meta:
         model = SavedQueryBuilder
+        fields = ['id', 'name', 'query']
+
+
+class SavedRawQueryPostBodySerializer(serializers.Serializer):
+    name = serializers.CharField()
+    query = serializers.CharField()
+
+
+class SavedRawQuerySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SavedRawQuery
         fields = ['id', 'name', 'query']

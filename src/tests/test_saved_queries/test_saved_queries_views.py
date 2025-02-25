@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from saved_queries.models import SavedQueryBuilder
+from saved_queries.models import SavedQueryBuilder, SavedRawQuery
 
 data = {
     'name': 'myquery',
@@ -23,11 +23,23 @@ data = {
     }
 }
 
+raw_query_data = {
+    'name': 'myquery',
+    'query': 'select * from demo_demomodel;'
+}
+
 @pytest.fixture
 def saved_query(db) -> SavedQueryBuilder:
     return SavedQueryBuilder.objects.create(
         name='saved_query',
         query=data.get('query')
+    )
+
+@pytest.fixture
+def saved_raw_query(db) -> SavedRawQuery:
+    return SavedRawQuery.objects.create(
+        name='saved_query',
+        query=raw_query_data.get('query')
     )
 
 
@@ -389,6 +401,194 @@ def test_delete_query_builder_valid_body(api_client, superuser_token, saved_quer
     response = client.delete(
         reverse(
             'delete_query_builder', kwargs={'id': saved_query.pk}
+        ),
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+
+    assert response.status_code == 202
+
+
+    client = api_client()
+
+    response = client.get(
+        reverse(
+            'get_all_query_builders', 
+        ),
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 200
+
+def test_add_raw_query_non_admin(api_client, non_admin_token):
+    client = api_client()
+
+    response = client.post(
+        reverse(
+            'add_raw_query', 
+        ),
+        data=raw_query_data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
+    )
+    assert response.status_code == 401
+
+def test_add_raw_query_non_superuser(api_client, limited_admin_token):
+    client = api_client()
+
+    response = client.post(
+        reverse(
+            'add_raw_query', 
+        ),
+        data=raw_query_data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
+    )
+    assert response.status_code == 403
+
+def test_add_raw_query_invalid_body(api_client, superuser_token):
+    client = api_client()
+    invalid_data = {
+        'name': 'myquery'
+    }
+
+    response = client.post(
+        reverse(
+            'add_raw_query', 
+        ),
+        data=invalid_data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 400
+
+def test_add_raw_query_valid_body(api_client, superuser_token):
+    client = api_client()
+
+    response = client.post(
+        reverse(
+            'add_raw_query', 
+        ),
+        data=raw_query_data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 201
+
+def test_change_raw_query_non_admin(api_client, non_admin_token, saved_raw_query):
+    client = api_client()
+
+    response = client.post(
+        reverse(
+            'change_raw_query', kwargs={'id': saved_raw_query.pk}
+        ),
+        data=raw_query_data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
+    )
+    assert response.status_code == 401
+
+def test_change_raw_query_non_superuser(api_client, limited_admin_token, saved_raw_query):
+    client = api_client()
+
+    response = client.post(
+        reverse(
+            'change_raw_query', kwargs={'id': saved_raw_query.pk}
+        ),
+        data=raw_query_data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
+    )
+    assert response.status_code == 403
+
+def test_change_raw_query_invalid_body(api_client, superuser_token, saved_raw_query):
+    client = api_client()
+    invalid_data = {
+        'name': 'myquery'
+    }
+
+    response = client.post(
+        reverse(
+            'change_raw_query', kwargs={'id': saved_raw_query.pk}
+        ),
+        data=invalid_data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 400
+
+def test_change_raw_query_not_existing(api_client, superuser_token):
+    client = api_client()
+    raw_query_data['name'] = 'updated'
+
+    response = client.post(
+        reverse(
+            'change_raw_query', kwargs={'id': 1111}
+        ),
+        data=raw_query_data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+
+    assert response.status_code == 404
+
+def test_change_raw_query_valid_body(api_client, superuser_token, saved_raw_query):
+    client = api_client()
+    raw_query_data['name'] = 'updated'
+
+    response = client.post(
+        reverse(
+            'change_raw_query', kwargs={'id': saved_raw_query.pk}
+        ),
+        data=raw_query_data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+
+    assert response.status_code == 201
+
+def test_delete_raw_query_non_admin(api_client, non_admin_token, saved_raw_query):
+    client = api_client()
+
+    response = client.delete(
+        reverse(
+            'delete_raw_query', kwargs={'id': saved_raw_query.pk}
+        ),
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
+    )
+    assert response.status_code == 401
+
+def test_delete_raw_query_non_superuser(api_client, limited_admin_token, saved_raw_query):
+    client = api_client()
+
+    response = client.delete(
+        reverse(
+            'delete_raw_query', kwargs={'id': saved_raw_query.pk}
+        ),
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
+    )
+    assert response.status_code == 403
+
+def test_delete_raw_query_not_existing(api_client, superuser_token):
+    client = api_client()
+
+    response = client.delete(
+        reverse(
+            'delete_raw_query', kwargs={'id': 1111}
+        ),
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
+    )
+    assert response.status_code == 404
+
+def test_delete_raw_query_valid_body(api_client, superuser_token, saved_raw_query):
+    client = api_client()
+
+    response = client.delete(
+        reverse(
+            'delete_raw_query', kwargs={'id': saved_raw_query.pk}
         ),
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
