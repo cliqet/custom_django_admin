@@ -8,7 +8,7 @@ from .models import Classification, Country, CountryProfile, DemoModel, Level, T
 
 # It is possible for non-related models to be inlines
 class CountryProfileCustomInline(BaseCustomInline):
-    app_label = 'demo'
+    app_label = 'django_admin_demo'
     model_name = 'countryprofile'
     model_name_label = 'CountryProfile'
     list_display = ['country', 'level', 'type', 'area']
@@ -22,7 +22,7 @@ class CountryProfileCustomInline(BaseCustomInline):
 
 # It is possible to have the same model as the inline
 class TypeCustomInline(BaseCustomInline):
-    app_label = 'demo'
+    app_label = 'django_admin_demo'
     model_name = 'type'
     model_name_label = 'Type'
     list_display = ['name']
@@ -35,7 +35,7 @@ class TypeCustomInline(BaseCustomInline):
 
 
 class DemoModelCustomInline(BaseCustomInline):
-    app_label = 'demo'
+    app_label = 'django_admin_demo'
     model_name = 'demomodel'
     model_name_label = 'DemoModel'
     list_display = ['name', 'type', 'color', 'ordering', 'is_active', 'email']

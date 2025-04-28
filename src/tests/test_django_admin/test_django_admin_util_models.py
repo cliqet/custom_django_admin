@@ -15,7 +15,7 @@ from django_admin.util_models import (
 from django_admin_demo.models import DemoModel
 
 
-def test__get_text_choices(demo_model_instance):
+def test_get_text_choices(demo_model_instance):
     fields = demo_model_instance._meta.get_fields()
     for field in fields:
         if not field.choices:
@@ -71,7 +71,7 @@ def test_get_model_fields_data(demo_model_instance):
     assert 'foreignkey_string' in data.get('type')
 
 def test_get_model():
-    model = get_model('demo.demomodel')
+    model = get_model('django_admin_demo.demomodel')
     assert isinstance(model, ModelBase)
 
 def test_build_filefield_helptext():

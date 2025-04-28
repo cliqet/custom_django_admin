@@ -1,5 +1,3 @@
-from backend.settings.base import APP_MODE, DjangoSettings
-
 # from .constants import DASHBOARD_URL_PREFIX
 
 APP_LIST_CONFIG_OVERRIDE = {
@@ -26,7 +24,7 @@ APP_LIST_CONFIG_OVERRIDE = {
 Example of overriding:
 APP_LIST_CONFIG_OVERRIDE = {
     # The name of the app
-    'demo': {
+    'django_admin_demo': {
         'app_url': f'{DASHBOARD_URL_PREFIX}/custom',
         'models': {
             # The name of the model
@@ -44,9 +42,3 @@ APP_LIST_CONFIG_OVERRIDE = {
     # You can add more apps
 }
 """
-
-# Do not override demo app for pytest
-# If you want to delete demo from the whole application, you must remove all 
-# references to it including the tests
-if APP_MODE == DjangoSettings.TEST and APP_LIST_CONFIG_OVERRIDE.get('demo'):
-    del APP_LIST_CONFIG_OVERRIDE['demo']
