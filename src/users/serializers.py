@@ -50,8 +50,8 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
         # The user is now authenticated and accessible through the serializer
         user = self.user  # This is set by the parent validate method
 
-        # Check if the user is staff
-        if not user.is_staff:
+        # Check if the user is staff and is active
+        if not (user.is_staff and user.is_active):
             raise AuthenticationFailed(
                 'You do not have permission to access this resource.', 
                 code='permission_denied'

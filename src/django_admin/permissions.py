@@ -45,6 +45,19 @@ class IsSuperUser(BasePermission):
             request.user.is_active and 
             request.user.is_superuser
         )
+    
+
+class IsActiveAdminUser(BasePermission):
+    """
+        Custom permission class that grants access only to admin users who are active.
+    """
+
+    def has_permission(self, request, view):
+        return (
+            request.user and 
+            request.user.is_staff and 
+            request.user.is_active
+        )
 
 
 def has_user_permission(

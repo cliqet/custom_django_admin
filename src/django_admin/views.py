@@ -13,12 +13,11 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
 from django_admin.decorators import has_model_permission
-from django_admin.permissions import IsSuperUser, has_user_permission
+from django_admin.permissions import IsActiveAdminUser, IsSuperUser, has_user_permission
 from services.cloudflare import verify_token
 from services.queue_service import (
     delete_jobs,
@@ -91,7 +90,7 @@ log = logging.getLogger(__name__)
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_apps(request):
     app_list = site.get_app_list(request)
 
@@ -166,7 +165,7 @@ def get_apps(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_fields(request, app_label: str, model_name: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -204,7 +203,7 @@ def get_model_fields(request, app_label: str, model_name: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_admin_settings(request, app_label: str, model_name: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -240,7 +239,7 @@ def get_model_admin_settings(request, app_label: str, model_name: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_fields_edit(request, app_label: str, model_name: str, pk: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -282,7 +281,7 @@ def get_model_fields_edit(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_permissions(request):
     permissions = Permission.objects.all()
 
@@ -300,7 +299,7 @@ def get_permissions(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_content_types(request):
     content_types = ContentType.objects.all()
 
@@ -319,7 +318,7 @@ def get_content_types(request):
 )
 @api_view(['GET'])
 @has_model_permission(Group, 'view')
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_groups(request):
     groups = Group.objects.all()
 
@@ -338,7 +337,7 @@ def get_groups(request):
 )
 @api_view(['GET'])
 @has_model_permission(LogEntry, 'view')
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_log_entries(request):
     log_entries = LogEntry.objects.all()
 
@@ -358,7 +357,7 @@ def get_log_entries(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_record(request, app_label: str, model_name: str, pk: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -392,7 +391,7 @@ def get_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def change_model_record(request, app_label: str, model_name: str, pk: str):
     boolean_values = {
         'true': True,
@@ -520,7 +519,7 @@ def change_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def delete_model_record(request, app_label: str, model_name: str, pk: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -555,7 +554,7 @@ def delete_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def add_model_record(request, app_label: str, model_name: str):
     boolean_values = {
         'true': True,
@@ -718,7 +717,7 @@ def add_model_record(request, app_label: str, model_name: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_listview(request, app_label: str, model_name: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -799,7 +798,7 @@ def get_model_listview(request, app_label: str, model_name: str):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def custom_action_view(request, app_label: str, model_name: str, func: str):
     try:
         body = request.data
@@ -821,7 +820,7 @@ def custom_action_view(request, app_label: str, model_name: str, func: str):
         )
     
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_inline_listview(request, parent_app_label: str, parent_model_name: str, change_obj_pk: str):
     try:
         model = get_model(f'{parent_app_label}.{parent_model_name}')
@@ -918,7 +917,7 @@ def verify_cloudflare_token(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def get_worker_queues(request):
     try:
         queues = get_queue_list()
@@ -942,7 +941,7 @@ def get_worker_queues(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def get_failed_queued_jobs(request, queue_name: str):
     try:
         jobs = get_failed_jobs(queue_name)
@@ -975,7 +974,7 @@ def get_failed_queued_jobs(request, queue_name: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def get_queued_job(request, queue_name: str, job_id: str):
     try:
         job = get_job(queue_name, job_id)
@@ -1001,7 +1000,7 @@ def get_queued_job(request, queue_name: str, job_id: str):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def requeue_failed_jobs(request):
     try:
         body = request.data
@@ -1045,7 +1044,7 @@ def requeue_failed_jobs(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def delete_queued_jobs(request):
     try:
         body = request.data

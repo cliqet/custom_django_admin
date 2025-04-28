@@ -123,3 +123,14 @@ Resets the password of the user from reset link. Returns:
 }
 ```
 """
+
+
+REFRESH_TOKEN_DOC = """
+Retrieve new access token if current access token expires 
+and set refresh_token in a secure cookie. Returns:
+```json
+{
+    "access": "ey..."
+}
+```
+"""

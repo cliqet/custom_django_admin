@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timedelta
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
@@ -8,11 +9,21 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
+    TokenRefreshView,
 )
 
-from backend.settings.base import APP_MODE, PROTOCOL, UI_DOMAIN, DjangoSettings
+from backend.settings.base import (
+    APP_MODE,
+    DOMAIN,
+    ENV,
+    PROTOCOL,
+    UI_DOMAIN,
+    DjangoSettings,
+)
 from django_admin.serializers import PermissionSerializer
 from services.email_service import send_email
 from services.queue_service import enqueue
@@ -23,6 +34,7 @@ from .docs import (
     GET_USER_PERMISSIONS_DOC,
     LOGIN_DOC,
     LOGOUT_DOC,
+    REFRESH_TOKEN_DOC,
     RESET_PASSWORD_VIA_LINK_DOC,
     SEND_PASSWORD_RESET_LINK_DOC,
     VERIFY_PASSWORD_RESET_LINK_DOC,
@@ -128,6 +140,10 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
         is_secure_cookie = APP_MODE != DjangoSettings.LOCAL
 
+        cookie_expiration = datetime.now() + timedelta(
+            days=ENV.application.jwt_refresh_token_life
+        )
+
         # Set the refresh token in a secure cookie
         refresh_token = response.data.get('refresh')
         response.set_cookie(
@@ -136,9 +152,91 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             httponly=True,  # Prevent JavaScript access
             secure=is_secure_cookie,    # Only send cookie over HTTPS
             samesite='Lax', # Adjust as necessary for your use case
+            path='/',
+            domain=DOMAIN,
+            expires=cookie_expiration,
         )
 
         response.data.pop('refresh', None)
+
+        return response
+
+
+@extend_schema(
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(description=REFRESH_TOKEN_DOC),
+    }
+)
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        refresh_token_from_cookie = request.COOKIES.get('refresh_token')
+
+        # If the cookie is missing, return an error
+        if not refresh_token_from_cookie:
+            return Response(
+                {
+                    'message': 'Invalid request',
+                    'error': 'Refresh token is missing',
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        try:
+            # Decode the refresh token (this validates the token such as expiry, signature, ...)
+            refresh_token = RefreshToken(refresh_token_from_cookie)
+
+            # Ensure the token is a refresh token
+            if refresh_token.payload.get('token_type') != 'refresh':
+                return Response(
+                    {'error': 'Invalid token type'}, status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            if BlacklistedToken.objects.filter(
+                token__token=refresh_token_from_cookie
+            ).exists():
+                return Response(
+                    {'error': 'Token is blacklisted'},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+
+            # Extract the user ID from the payload
+            user_id = refresh_token.payload.get('user_id')
+            user = CustomUser.objects.get(uid=user_id)
+
+            # Create new access and refresh tokens
+            new_access_token = str(refresh_token.access_token)
+            new_refresh_token = str(RefreshToken.for_user(user))
+        except Exception as e:
+            log.error(f'Error decoding refresh token: {str(e)}')
+
+            return Response(
+                {'error': 'Invalid refresh token'}, status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Prepare the response
+        response = Response(
+            {
+                'access': new_access_token,
+            }
+        )
+
+        is_secure_cookie = APP_MODE != DjangoSettings.LOCAL
+
+        cookie_expiration = datetime.now() + timedelta(
+            days=ENV.application.jwt_refresh_token_life
+        )
+
+        # Set the new refresh token in a secure cookie
+        response.set_cookie(
+            key='refresh_token',
+            value=new_refresh_token,
+            httponly=True,
+            secure=is_secure_cookie,
+            samesite='Lax',
+            domain=DOMAIN,
+            path='/',
+            expires=cookie_expiration,
+        )
 
         return response
 
