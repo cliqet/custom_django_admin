@@ -19,9 +19,9 @@ from backend.settings.base import (
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('api/v1/django-admin/users/', include('users.urls')),
-    path('api/v1/django-admin/model-docs/', include('documentation.urls')),
-    path('api/v1/django-admin/saved-queries/', include('saved_queries.urls')),
+    path('api/v1/django-admin/users/', include('django_admin_users.urls')),
+    path('api/v1/django-admin/model-docs/', include('django_admin_documentation.urls')),
+    path('api/v1/django-admin/saved-queries/', include('django_admin_saved_queries.urls')),
     path('api/v1/django-admin/', include('django_admin.urls')),
 
     # API documentation 

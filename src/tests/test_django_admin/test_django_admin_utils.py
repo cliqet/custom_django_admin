@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Permission
 
 from django_admin.serializers import PermissionSerializer
-from users.utils import get_user_unique_permissions, organize_permissions
+from django_admin_users.utils import get_user_unique_permissions, organize_permissions
 
 
 def test_get_user_unique_permissions(superuser, limited_admin, demo_permissions):

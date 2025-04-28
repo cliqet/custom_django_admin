@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from saved_queries.models import SavedQueryBuilder, SavedRawQuery
+from django_admin_saved_queries.models import SavedQueryBuilder, SavedRawQuery
 
 data = {
     'name': 'myquery',

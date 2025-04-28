@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0012_alter_user_first_name_max_length'),
-        ('demo', '0001_initial'),
+        ('django_admin_demo', '0001_initial'),
     ]
 
     operations = [

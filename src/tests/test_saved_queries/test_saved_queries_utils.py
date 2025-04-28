@@ -1,8 +1,11 @@
 from django.db.models import Q
 
-from demo.models import DemoModel
 from django_admin.util_models import get_model_fields_data
-from saved_queries.utils import build_conditions_query, transform_conditions_query
+from django_admin_demo.models import DemoModel
+from django_admin_saved_queries.utils import (
+    build_conditions_query,
+    transform_conditions_query,
+)
 
 
 def test_transform_conditions_query(db):

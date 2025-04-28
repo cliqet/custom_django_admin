@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('demo', '0004_country_level_alter_demomodel_file_and_more'),
+        ('django_admin_demo', '0004_country_level_alter_demomodel_file_and_more'),
     ]
 
     operations = [

@@ -8,7 +8,7 @@ import django_admin.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('demo', '0002_demomodel_permissions'),
+        ('django_admin_demo', '0002_demomodel_permissions'),
     ]
 
     operations = [

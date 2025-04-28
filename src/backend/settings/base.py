@@ -64,13 +64,13 @@ INSTALLED_APPS = [
 
     # user-defined apps
     'django_admin',
-    'users',
-    'documentation',
-    'saved_queries',
-    'demo', # For demo purposes only. Delete this!!!!!
+    'django_admin_users',
+    'django_admin_documentation',
+    'django_admin_saved_queries',
+    'django_admin_demo', # For demo purposes and testing only
 ]
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'django_admin_users.CustomUser'
 
 # DRF settings
 REST_FRAMEWORK = {

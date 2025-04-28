@@ -2,8 +2,9 @@
 
 import django.core.validators
 import django.utils.timezone
-import users.models
 from django.db import migrations, models
+
+import django_admin_users.models
 
 
 class Migration(migrations.Migration):
@@ -18,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CustomUser',
             fields=[
-                ('uid', models.CharField(default=users.models.generate_user_id, editable=False, max_length=255, primary_key=True, serialize=False, verbose_name='UID')),
+                ('uid', models.CharField(default=django_admin_users.models.generate_user_id, editable=False, max_length=255, primary_key=True, serialize=False, verbose_name='UID')),
                 ('email', models.EmailField(default='', help_text='Enter a valid email address', max_length=254, unique=True, validators=[django.core.validators.EmailValidator(message='Please enter a valid email address')], verbose_name='Email Address')),
                 ('first_name', models.CharField(default='', max_length=255, verbose_name='First Name')),
                 ('last_name', models.CharField(default='', max_length=255, verbose_name='Last Name')),
