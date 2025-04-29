@@ -91,7 +91,7 @@ def test_is_valid_modelfield_file():
     filefield_helptext = "Allowed file types: ['.jpg', '.jpeg'] | Max file size in MB: [2]"
     content_size = 1024 
     valid_size_content = b'0' * (content_size * 2)
-    invalid_size_content = b'0' * (content_size * 3)
+    invalid_size_content = b'0' * (content_size * content_size * 2 + 1)  # 2mb + 1 byte
 
     valid_image = SimpleUploadedFile(
         name='test_image.jpg',

@@ -241,7 +241,8 @@ def is_valid_modelfield_file(filefield_helptext: str, file: InMemoryUploadedFile
             is_valid_size = True
         else:
             # If there is a size limit
-            if file.size <= int(size_limit_in_mb) * 1024:
+            file_size_in_mb = file.size / (1024 ** 2)
+            if file_size_in_mb <= int(size_limit_in_mb):
                 is_valid_size = True
 
     return {
