@@ -4,6 +4,8 @@ from django.db.models import Model
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
+from .constants import ModelField
+
 
 def get_serializer(app_name: str, serializer_class_name: str) -> ModelSerializer:
     """ Look up a drf serializer model from an "<app_name>.serializers" path """
@@ -55,14 +57,14 @@ def create_post_body_model_serializer(model_fields_data: dict, is_editing: bool 
         a model record. The serializer will have fields based on fields of the record
     """
     other_serializer_fields = {
-        'EmailField': serializers.EmailField(),
-        'TextField': serializers.CharField(),
-        'BooleanField': serializers.BooleanField(),
-        'DateField': serializers.DateField(),
-        'TimeField': serializers.TimeField(),
-        'DateTimeField': serializers.DateTimeField(),
-        'JSONField': serializers.JSONField(),
-        'HTMLField': serializers.CharField(),
+        ModelField.EmailField: serializers.EmailField(),
+        ModelField.TextField: serializers.CharField(),
+        ModelField.BooleanField: serializers.BooleanField(),
+        ModelField.DateField: serializers.DateField(),
+        ModelField.TimeField: serializers.TimeField(),
+        ModelField.DateTimeField: serializers.DateTimeField(),
+        ModelField.JSONField: serializers.JSONField(),
+        ModelField.HTMLField: serializers.CharField(),
     }
 
     serializer_fields = {}
@@ -73,7 +75,7 @@ def create_post_body_model_serializer(model_fields_data: dict, is_editing: bool 
             continue
 
         # these are auto-generated fields
-        elif data.get('type') == 'BigAutoField' or field_name == 'uid':
+        elif data.get('type') == ModelField.BigAutoField or field_name == 'uid':
             continue
 
         # fields that are not required
@@ -83,20 +85,24 @@ def create_post_body_model_serializer(model_fields_data: dict, is_editing: bool 
         elif field_name == 'password' and is_editing:
             continue
 
-        elif data.get('type') == 'CharField':
+        elif data.get('type') == ModelField.CharField:
             serializer_fields[field_name] = serializers.CharField(
                 max_length=data.get('max_length'),
                 min_length=1 if data.get('required') else None,
                 required=data.get('required')
             )
 
-        elif data.get('type') in ['IntegerField', 'PositiveIntegerField', 'PositiveSmallIntegerField']:
+        elif data.get('type') in [
+            ModelField.IntegerField, 
+            ModelField.PositiveIntegerField,
+            ModelField.PositiveSmallIntegerField
+        ]:
             serializer_fields[field_name] = serializers.IntegerField(
                 max_value=data.get('max_value') or None,
                 min_value=data.get('min_value') or None
             )
 
-        elif data.get('type') == 'ManyToManyField':
+        elif data.get('type') == ModelField.ManyToManyField:
             # May contain an empty string or comma separated pks. E.g. 1,2,5
             # It may be a pk as id or a uid
             serializer_fields[field_name] = serializers.CharField(
@@ -105,19 +111,19 @@ def create_post_body_model_serializer(model_fields_data: dict, is_editing: bool 
 
         # When editing, do not require image and file fields since these should 
         # have been required when first created
-        elif data.get('type') == 'ImageField' and is_editing:
+        elif data.get('type') == ModelField.ImageField and is_editing:
             serializer_fields[field_name] = serializers.ImageField(required=False)
 
-        elif data.get('type') == 'ImageField' and not is_editing:
+        elif data.get('type') == ModelField.ImageField and not is_editing:
             serializer_fields[field_name] = serializers.ImageField(required=True)
 
-        elif data.get('type') == 'FileField' and is_editing:
+        elif data.get('type') == ModelField.FileField and is_editing:
             serializer_fields[field_name] = serializers.FileField(required=False)
 
-        elif data.get('type') == 'FileField' and not is_editing:
+        elif data.get('type') == ModelField.FileField and not is_editing:
             serializer_fields[field_name] = serializers.FileField(required=True)
 
-        elif data.get('type') == 'DecimalField':
+        elif data.get('type') == ModelField.DecimalField:
             serializer_fields[field_name] = serializers.DecimalField(
                 max_digits=data.get('max_digits'),
                 decimal_places=data.get('decimal_places')

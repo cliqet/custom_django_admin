@@ -29,7 +29,7 @@ from services.queue_service import (
 
 from .actions import ACTIONS
 from .configuration import APP_LIST_CONFIG_OVERRIDE
-from .constants import DASHBOARD_URL_PREFIX
+from .constants import DASHBOARD_URL_PREFIX, ModelField
 from .data_transform import transform_dict_to_camel_case
 from .docs import (
     ADD_CHANGE_MODEL_RECORD_ERROR_DOC,
@@ -418,12 +418,16 @@ def change_model_record(request, app_label: str, model_name: str, pk: str):
         if post_body_serializer.is_valid():
             instance_data = {}
             for key, value in body.items():
-                if model_fields_data.get(key).get('type') == 'ManyToManyField':
+                if model_fields_data.get(key).get('type') == ModelField.ManyToManyField:
                     if value:
                         instance_data[key] = value.split(',')
-                elif model_fields_data.get(key).get('type') == 'BooleanField':
+                elif model_fields_data.get(key).get('type') == ModelField.BooleanField:
                     instance_data[key] = boolean_values[value]
-                elif model_fields_data.get(key).get('type') in ['FileField', 'ImageField']:
+                elif model_fields_data.get(key).get('type') == ModelField.JSONField:
+                    instance_data[key] = json.loads(value)
+                elif model_fields_data.get(key).get('type') in [
+                    ModelField.FileField, ModelField.ImageField
+                ]:
                     # If no file was passed, it must not be required
                     if value == '':
                         continue
@@ -460,11 +464,11 @@ def change_model_record(request, app_label: str, model_name: str, pk: str):
                 if hasattr(instance, key):
                     field_type = model_fields_data.get(key).get('type')
                     
-                    if field_type == 'ManyToManyField':
+                    if field_type == ModelField.ManyToManyField:
                         # Update ManyToManyField relationships
                         getattr(instance, key).set(related_pk)  # Use getattr to call set() dynamically
                         
-                    elif field_type in ['ForeignKey', 'OneToOneField']:
+                    elif field_type in [ModelField.ForeignKey, ModelField.OneToOneField]:
                         # Retrieve the related instance using the provided pk
                         related_model = model._meta.get_field(key).related_model
                         instance_type = related_model.objects.get(pk=related_pk)  # Ensure value is the correct pk
@@ -585,14 +589,20 @@ def add_model_record(request, app_label: str, model_name: str):
 
             for key, value in body.items():
                 # store many to many field list first if there is data and not an empty string
-                if model_fields_data.get(key).get('type') == 'ManyToManyField':
+                if model_fields_data.get(key).get('type') == ModelField.ManyToManyField:
                     if value:
                         many_to_many_data[key] = value.split(',')
-                elif model_fields_data.get(key).get('type') in ['ForeignKey', 'OneToOneField']:
+                elif model_fields_data.get(key).get('type') in [
+                    ModelField.ForeignKey, ModelField.OneToOneField
+                ]:
                     foreignkey_data[key] = value
-                elif model_fields_data.get(key).get('type') == 'BooleanField':
+                elif model_fields_data.get(key).get('type') == ModelField.BooleanField:
                     instance_data[key] = boolean_values[value]
-                elif model_fields_data.get(key).get('type') in ['FileField', 'ImageField']:
+                elif model_fields_data.get(key).get('type') == ModelField.JSONField:
+                    instance_data[key] = json.loads(value)
+                elif model_fields_data.get(key).get('type') in [
+                    ModelField.FileField, ModelField.ImageField
+                ]:
                     # If no file was passed, it must not be required
                     if value == '':
                         continue
