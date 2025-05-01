@@ -536,7 +536,8 @@ def delete_model_record(request, app_label: str, model_name: str, pk: str):
         instance.delete()
 
         return Response({
-            'message': f'Deleted record [{instance.__str__()}] with pk {pk} successfully'
+            'message': f'Deleted record [{instance.__str__()}] with pk {pk} successfully',
+            'has_error': False
         }, status=status.HTTP_202_ACCEPTED)
     except Exception as e:
         log.error(f'Error: {str(e)}')
@@ -686,7 +687,8 @@ def add_model_record(request, app_label: str, model_name: str):
             instance.refresh_from_db()
 
             return Response({
-                'message': f'Created record [{instance.__str__()}] with pk {instance.pk} successfully'
+                'message': f'Created record [{instance.__str__()}] with pk {instance.pk} successfully',
+                'pk': instance.pk
             }, status=status.HTTP_201_CREATED)
         
         # If there are serialization errors
