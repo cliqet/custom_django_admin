@@ -59,6 +59,7 @@ class Environment:
         csrf_trusted_origins: list[str] = _application_env.get('csrf_trusted_origins')
         brand_name: str = _application_env.get('brand_name', 'CUSTOM DJANGO ADMIN')
         rq_api_token: str = _application_env.get('rq_api_token', '')
+        is_demo_mode: bool = _application_env.get('is_demo_mode', False)
 
         
     class LoggingConfig:

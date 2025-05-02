@@ -311,5 +311,7 @@ BRAND_NAME = ENV.application.brand_name
 
 RQ_API_TOKEN = ENV.application.rq_api_token
 
+IS_DEMO_MODE = ENV.application.is_demo_mode
+
 log.info('Base settings loaded')
 

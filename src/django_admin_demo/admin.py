@@ -108,7 +108,7 @@ class CountryAdmin(BaseModelAdmin):
 class CountryProfileAdmin(BaseModelAdmin):
     list_display = ['country', 'level', 'type', 'area']
     autocomplete_fields = ['country']
-    custom_change_link = f'{DASHBOARD_URL_PREFIX}/custom-change/country-profile'
+    # custom_change_link = f'{DASHBOARD_URL_PREFIX}/custom-change/country-profile'
 
 admin.site.register(Type, TypeAdmin)
 admin.site.register(Classification, ClassificationAdmin)

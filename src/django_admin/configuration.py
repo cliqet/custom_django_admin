@@ -1,7 +1,12 @@
-# from .constants import DASHBOARD_URL_PREFIX
+from backend.settings.base import IS_DEMO_MODE
+
+from .constants import DASHBOARD_URL_PREFIX
 
 APP_LIST_CONFIG_OVERRIDE = {
-    'saved_queries': {
+    'django_admin_saved_queries': {
+        'is_hidden': True,
+    },
+    'django_admin_demo': {
         'is_hidden': True,
     }
 }
@@ -20,25 +25,23 @@ APP_LIST_CONFIG_OVERRIDE = {
 # - admin_url
 # - add_url
 
-"""
-Example of overriding:
-APP_LIST_CONFIG_OVERRIDE = {
-    # The name of the app
-    'django_admin_demo': {
-        'app_url': f'{DASHBOARD_URL_PREFIX}/custom',
-        'models': {
-            # The name of the model
-            'Classification': {
-                'admin_url': f'{DASHBOARD_URL_PREFIX}/custom/classification',
-                'add_url': f'{DASHBOARD_URL_PREFIX}/custom/classification/customadd',
+if IS_DEMO_MODE:
+    APP_LIST_CONFIG_OVERRIDE.update({
+        # The name of the app
+        'django_admin_demo': {
+            'app_url': f'{DASHBOARD_URL_PREFIX}/custom',
+            'models': {
+                # The name of the model
+                'Classification': {
+                    'admin_url': f'{DASHBOARD_URL_PREFIX}/custom/classification',
+                    'add_url': f'{DASHBOARD_URL_PREFIX}/custom/classification/customadd',
+                },
+                'Level': {
+                    'is_hidden': True  # hides the model from the app list
+                }
+                # You can add more models
             },
-            'Level': {
-                'is_hidden': True  # hides the model from the app list
-            }
-            # You can add more models
+            # 'is_hidden': True  # hides the app from the app list (all models under are hidden)
         },
-        # 'is_hidden': True  # hides the app from the app list (all models under are hidden)
-    },
-    # You can add more apps
-}
-"""
+        # You can add more apps
+    })

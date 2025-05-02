@@ -135,6 +135,9 @@
   # Required string. The api token to access rq stats
   rq_api_token = ''
 
+  # Optional bool. Defaults to false. Whether to use the demo models
+  is_demo_mode = false
+
 
 [logging_config]
   # Handlers to use for logging
