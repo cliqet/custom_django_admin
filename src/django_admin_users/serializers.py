@@ -4,12 +4,12 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from django_admin.serializers import BaseModelSerializer
+from django_admin.serializers import AdminBaseModelSerializer
 
 from .models import CustomUser
 
 
-class CustomUserListSerializer(BaseModelSerializer):
+class AdminCustomUserListSerializer(AdminBaseModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
@@ -18,13 +18,13 @@ class CustomUserListSerializer(BaseModelSerializer):
         ]
 
 
-class CustomUserDetailsSerializer(BaseModelSerializer):
+class AdminCustomUserDetailsSerializer(AdminBaseModelSerializer):
     class Meta:
         model = CustomUser
         exclude = ['password']
 
 
-class UserObtainPairSerializer(TokenObtainPairSerializer):
+class AdminUserObtainPairSerializer(TokenObtainPairSerializer):
     """ Customize claims for token """
     @classmethod
     def get_token(cls, user: CustomUser):
@@ -60,5 +60,5 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
         return data
     
 
-class ResetPasswordViaLinkBodySerializer(serializers.Serializer):
+class AdminResetPasswordViaLinkBodySerializer(serializers.Serializer):
     password = serializers.CharField()

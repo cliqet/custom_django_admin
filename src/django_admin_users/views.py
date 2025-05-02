@@ -24,7 +24,7 @@ from backend.settings.base import (
     UI_DOMAIN,
     DjangoSettings,
 )
-from django_admin.serializers import PermissionSerializer
+from django_admin.serializers import AdminPermissionSerializer
 from services.email_service import send_email
 from services.queue_service import enqueue
 
@@ -41,9 +41,9 @@ from .docs import (
 )
 from .models import CustomUser
 from .serializers import (
-    CustomUserDetailsSerializer,
-    CustomUserListSerializer,
-    ResetPasswordViaLinkBodySerializer,
+    AdminCustomUserDetailsSerializer,
+    AdminCustomUserListSerializer,
+    AdminResetPasswordViaLinkBodySerializer,
 )
 from .utils import get_user_unique_permissions, organize_permissions
 
@@ -52,7 +52,7 @@ log = logging.getLogger(__name__)
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=CustomUserListSerializer,
+            response=AdminCustomUserListSerializer,
             description=GET_ALL_USERS_DOC
         ),
     }
@@ -63,14 +63,14 @@ def get_all_users(request):
     users = CustomUser.objects.all()
 
     return Response({
-        'users': CustomUserListSerializer(users, many=True).data
+        'users': AdminCustomUserListSerializer(users, many=True).data
     }, status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=CustomUserDetailsSerializer,
+            response=AdminCustomUserDetailsSerializer,
             description=GET_USER_DETAIL_DOC
         ),
         status.HTTP_404_NOT_FOUND: OpenApiResponse(
@@ -86,7 +86,7 @@ def get_user_detail(request, uid: str):
         user = CustomUser.objects.get(uid=uid)
 
         return Response({
-            'user': CustomUserDetailsSerializer(user).data
+            'user': AdminCustomUserDetailsSerializer(user).data
         }, status=status.HTTP_200_OK)
     except CustomUser.DoesNotExist:
         return Response({
@@ -110,7 +110,7 @@ def get_user_permissions(request, uid: str):
     try:
         user = CustomUser.objects.get(uid=uid)
         unique_permissions = get_user_unique_permissions(user)
-        serialized_permissions = PermissionSerializer(unique_permissions, many=True).data
+        serialized_permissions = AdminPermissionSerializer(unique_permissions, many=True).data
 
         return Response({
             'permissions': organize_permissions(serialized_permissions, request.user)
@@ -347,7 +347,7 @@ def verify_password_reset_link(request, uidb64, token):
 def reset_password_via_link(request, uidb64, token):
     try:
         body = request.data
-        serialized_body = ResetPasswordViaLinkBodySerializer(data=body)
+        serialized_body = AdminResetPasswordViaLinkBodySerializer(data=body)
         if not serialized_body.is_valid():
             return Response({
                 'success': False, 'message': 'Invalid request'

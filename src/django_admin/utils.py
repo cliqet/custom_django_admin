@@ -1,14 +1,15 @@
-from django.contrib.admin import ModelAdmin
 from django.db.models import ForeignKey, Model
+from django.http.request import HttpRequest
 
-from .serializers import CustomInlineSerializer
+from .admin import BaseModelAdmin
+from .serializers import AdminCustomInlineSerializer
 
 
 def get_model_perm(permission_code_name: str, model_name: str) -> str:
     return permission_code_name.replace(f'_{model_name}', '')
 
 
-def serialize_model_admin(app_label: str, model: Model, model_admin: ModelAdmin) -> dict:
+def serialize_model_admin(app_label: str, model: Model, model_admin: BaseModelAdmin) -> dict:
     """
         Serializes the model admin settings
     """
@@ -30,7 +31,7 @@ def serialize_model_admin(app_label: str, model: Model, model_admin: ModelAdmin)
         'custom_actions': model_admin.custom_actions,
         'autocomplete_fields': model_admin.autocomplete_fields,
         'table_filters': model_admin.table_filters,
-        'custom_inlines': CustomInlineSerializer(
+        'custom_inlines': AdminCustomInlineSerializer(
             model_admin.custom_inlines,
             many=True
         ).data,
@@ -105,7 +106,7 @@ def serialize_model_admin(app_label: str, model: Model, model_admin: ModelAdmin)
 
     return serialized_data
 
-def get_client_ip(request) -> str:
+def get_client_ip(request: HttpRequest) -> str:
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
         ip = x_forwarded_for.split(",")[0]

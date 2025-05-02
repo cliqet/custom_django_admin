@@ -67,7 +67,9 @@ INSTALLED_APPS = [
     'django_admin_users',
     'django_admin_documentation',
     'django_admin_saved_queries',
-    'django_admin_demo', # For demo purposes and testing only
+
+    # For demo purposes and testing only. Set is_demo_mode config to false to hide it
+    'django_admin_demo', 
 ]
 
 AUTH_USER_MODEL = 'django_admin_users.CustomUser'

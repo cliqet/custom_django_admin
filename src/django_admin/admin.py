@@ -17,10 +17,10 @@ from .constants import LIST_PAGE_COUNT
 
 # Add serializer class property to builtin Django models and 3rd party apps
 # Handled in common.util_serializers.get_dynamic_serializer
-LogEntry.serializer_classname = 'LogEntrySerializer'
-Group.serializer_classname = 'GroupSerializer'
-BlacklistedToken.serializer_classname = 'BlacklistedTokenSerializer'
-OutstandingToken.serializer_classname = 'OutstandingTokenSerializer'
+LogEntry.admin_serializer_classname = 'AdminLogEntrySerializer'
+Group.admin_serializer_classname = 'AdminGroupSerializer'
+BlacklistedToken.admin_serializer_classname = 'AdminBlacklistedTokenSerializer'
+OutstandingToken.admin_serializer_classname = 'AdminOutstandingTokenSerializer'
 
 
 class CUSTOM_ACTIONS(Enum):

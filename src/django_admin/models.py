@@ -17,7 +17,7 @@ class BaseModel(models.Model):
         abstract = True
 
     def generate_uid(self) -> str:
-        return f'{self.UID_PREFIX}_{uuid4()}'
+        return f'{self.UID_PREFIX}-{uuid4()}'
         
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -30,23 +30,22 @@ def get_dynamic_serializer(app_name: str, model: Model) -> ModelSerializer:
 
     # These are serializers for models where models are not defined in the code
     outside_serializers = {
-        'BlacklistedToken': 'BlacklistedTokenSerializer',
-        'OutstandingToken': 'OutstandingTokenSerializer',
-        'LogEntry': 'LogEntrySerializer',
-        'Group': 'GroupSerializer',
+        'BlacklistedToken': 'AdminBlacklistedTokenSerializer',
+        'OutstandingToken': 'AdminOutstandingTokenSerializer',
+        'LogEntry': 'AdminLogEntrySerializer',
+        'Group': 'AdminGroupSerializer',
     }
 
     # Handle 3rd party apps
     if app_name in third_party_apps or app_name in django_builtin_apps:
         app_name: str = 'django_admin'
-        serializer_classname: str = outside_serializers.get(model.__name__)
+        admin_serializer_classname: str = outside_serializers.get(model.__name__)
     else:
-        serializer_classname: str = model.serializer_classname
+        admin_serializer_classname: str = model.admin_serializer_classname
         
-
     module_path = f"{app_name}.serializers"
     module = import_module(module_path)
-    serializer_class = getattr(module, serializer_classname, None)
+    serializer_class = getattr(module, admin_serializer_classname, None)
 
     return serializer_class
 

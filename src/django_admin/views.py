@@ -55,16 +55,16 @@ from .docs import (
     VERIFY_CLOUDFLARE_TOKEN_ERROR_DOC,
 )
 from .serializers import (
-    AppSerializer,
-    ContentTypeSerializer,
-    GroupSerializer,
-    LogEntrySerializer,
-    ModelAdminSettingsSerializer,
-    ModelFieldSerializer,
-    PermissionSerializer,
-    QueuedJobSerializer,
-    RequeueOrDeleteJobsBodySerializer,
-    VerifyTokenBodySerializer,
+    AdminAppSerializer,
+    AdminContentTypeSerializer,
+    AdminGroupSerializer,
+    AdminLogEntrySerializer,
+    AdminModelAdminSettingsSerializer,
+    AdminModelFieldSerializer,
+    AdminPermissionSerializer,
+    AdminQueuedJobSerializer,
+    AdminRequeueOrDeleteJobsBodySerializer,
+    AdminVerifyTokenBodySerializer,
 )
 from .util_models import (
     get_converted_pk,
@@ -84,7 +84,7 @@ log = logging.getLogger(__name__)
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=AppSerializer,
+            response=AdminAppSerializer,
             description=GET_APPS_DOC
         ),
     }
@@ -149,14 +149,14 @@ def get_apps(request):
     
         new_app_list.append(new_app)
     return Response(transform_dict_to_camel_case({
-        'app_list': AppSerializer(new_app_list, many=True).data
+        'app_list': AdminAppSerializer(new_app_list, many=True).data
     }), status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=ModelFieldSerializer,
+            response=AdminModelFieldSerializer,
             description=GET_MODEL_FIELDS_DOC
         ),
         status.HTTP_404_NOT_FOUND: OpenApiResponse(
@@ -194,7 +194,7 @@ def get_model_fields(request, app_label: str, model_name: str):
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=ModelAdminSettingsSerializer,
+            response=AdminModelAdminSettingsSerializer,
             description=GET_MODEL_ADMIN_SETTINGS_DOC
         ),
         status.HTTP_404_NOT_FOUND: OpenApiResponse(
@@ -230,7 +230,7 @@ def get_model_admin_settings(request, app_label: str, model_name: str):
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=ModelFieldSerializer,
+            response=AdminModelFieldSerializer,
             description=GET_MODEL_FIELDS_DOC
         ),
         status.HTTP_404_NOT_FOUND: OpenApiResponse(
@@ -275,7 +275,7 @@ def get_model_fields_edit(request, app_label: str, model_name: str, pk: str):
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=PermissionSerializer,
+            response=AdminPermissionSerializer,
             description=GET_PERMISSIONS_DOC
         ),
     }
@@ -286,14 +286,14 @@ def get_permissions(request):
     permissions = Permission.objects.all()
 
     return Response(transform_dict_to_camel_case({
-        'permissions': PermissionSerializer(permissions, many=True).data
+        'permissions': AdminPermissionSerializer(permissions, many=True).data
     }), status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=ContentTypeSerializer,
+            response=AdminContentTypeSerializer,
             description=GET_CONTENT_TYPES_DOC
         ),
     }
@@ -304,14 +304,14 @@ def get_content_types(request):
     content_types = ContentType.objects.all()
 
     return Response(transform_dict_to_camel_case({
-        'content_types': ContentTypeSerializer(content_types, many=True).data
+        'content_types': AdminContentTypeSerializer(content_types, many=True).data
     }), status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=GroupSerializer,
+            response=AdminGroupSerializer,
             description=GET_GROUPS_DOC
         ),
     }
@@ -323,14 +323,14 @@ def get_groups(request):
     groups = Group.objects.all()
 
     return Response(transform_dict_to_camel_case({
-        'groups': GroupSerializer(groups, many=True).data
+        'groups': AdminGroupSerializer(groups, many=True).data
     }), status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=LogEntrySerializer,
+            response=AdminLogEntrySerializer,
             description=GET_LOG_ENTRIES_DOC
         ),
     }
@@ -342,7 +342,7 @@ def get_log_entries(request):
     log_entries = LogEntry.objects.all()
 
     return Response(transform_dict_to_camel_case({
-        'log_entries': LogEntrySerializer(log_entries, many=True).data
+        'log_entries': AdminLogEntrySerializer(log_entries, many=True).data
     }), status=status.HTTP_200_OK)
 
 
@@ -886,7 +886,7 @@ def get_inline_listview(request, parent_app_label: str, parent_model_name: str, 
 
 
 @extend_schema(
-    request=VerifyTokenBodySerializer,
+    request=AdminVerifyTokenBodySerializer,
     responses={
         status.HTTP_202_ACCEPTED: OpenApiResponse(
             description=VERIFY_CLOUDFLARE_TOKEN_DOC
@@ -900,7 +900,7 @@ def get_inline_listview(request, parent_app_label: str, parent_model_name: str, 
 def verify_cloudflare_token(request):
     try:
         body = request.data
-        serialized_body = VerifyTokenBodySerializer(data=body)
+        serialized_body = AdminVerifyTokenBodySerializer(data=body)
 
         if serialized_body.is_valid():
             token = body.get('token')
@@ -957,7 +957,7 @@ def get_worker_queues(request):
 def get_failed_queued_jobs(request, queue_name: str):
     try:
         jobs = get_failed_jobs(queue_name)
-        serialized_jobs = QueuedJobSerializer(jobs, many=True).data
+        serialized_jobs = AdminQueuedJobSerializer(jobs, many=True).data
 
         return Response({
             'failed_jobs': {
@@ -992,7 +992,7 @@ def get_queued_job(request, queue_name: str, job_id: str):
         job = get_job(queue_name, job_id)
 
         return Response({
-            'job': QueuedJobSerializer(job).data,
+            'job': AdminQueuedJobSerializer(job).data,
         }, status=status.HTTP_200_OK)
     except Exception as e:
         log.error(f'Error retrieving job id {job_id} from queue {queue_name}: {str(e)}')
@@ -1004,7 +1004,7 @@ def get_queued_job(request, queue_name: str, job_id: str):
 
 
 @extend_schema(
-    request=RequeueOrDeleteJobsBodySerializer,
+    request=AdminRequeueOrDeleteJobsBodySerializer,
     responses={
         status.HTTP_201_CREATED: OpenApiResponse(
             description=REQUEUE_FAILED_JOB_DOC
@@ -1016,7 +1016,7 @@ def get_queued_job(request, queue_name: str, job_id: str):
 def requeue_failed_jobs(request):
     try:
         body = request.data
-        data = RequeueOrDeleteJobsBodySerializer(data=body)
+        data = AdminRequeueOrDeleteJobsBodySerializer(data=body)
         if not data.is_valid():
             return Response({
                 'success': False,
@@ -1048,7 +1048,7 @@ def requeue_failed_jobs(request):
     
 
 @extend_schema(
-    request=RequeueOrDeleteJobsBodySerializer,
+    request=AdminRequeueOrDeleteJobsBodySerializer,
     responses={
         status.HTTP_200_OK: OpenApiResponse(
             description=GET_QUEUED_JOB_DOC
@@ -1060,7 +1060,7 @@ def requeue_failed_jobs(request):
 def delete_queued_jobs(request):
     try:
         body = request.data
-        data = RequeueOrDeleteJobsBodySerializer(data=body)
+        data = AdminRequeueOrDeleteJobsBodySerializer(data=body)
         if not data.is_valid():
             return Response({
                 'success': False,
