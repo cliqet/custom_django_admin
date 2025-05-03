@@ -5,8 +5,11 @@
  to have the default Django admin that we have gotten used to but make it more flexible on 
  the frontend side.
 
+### Latest Version
+version-2.0.0
+
 ### Frontend for Custom Django Admin
-- [SolidJS](https://github.com/cliqet/solidjs_django_admin)
+- [SolidJS](https://github.com/cliqet/solidjs_django_admin) (match the right version)
 
 ### Prerequisites
 - Python 3.12.0
@@ -137,7 +140,7 @@ You can view all models under the django_admin_demo by setting the config `is_de
 We will use the demo app as our guide. First, create your model
 ```python
 class DemoModel(BaseModel):
-    serializer_classname = 'DemoModelSerializer'
+    admin_serializer_classname = 'DemoModelSerializer'
 
     class ColorChoices(models.TextChoices):
         BLUE = ('Blue', 'Blue')
