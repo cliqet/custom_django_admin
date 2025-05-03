@@ -15,7 +15,7 @@ def get_jwt_config(ENV: dict) -> dict:
         'BLACKLIST_AFTER_ROTATION': True,  # True makes sure old refresh token cannot be used anymore
 
         # Custom token serializer
-        "TOKEN_OBTAIN_SERIALIZER": "django_admin_users.serializers.UserObtainPairSerializer",
+        "TOKEN_OBTAIN_SERIALIZER": "django_admin_users.serializers.AdminUserObtainPairSerializer",
 
         # 'ALGORITHM': 'HS256',
         'ALGORITHM': 'RS256',
