@@ -826,8 +826,9 @@ def custom_action_view(request, app_label: str, model_name: str, func: str):
         return action_response
     except Exception as e:
         log.error(f'Error in custom action view: {e}')
+
         return Response(
-            None,
+            {'message': f'An error occured while performing {func}'},
             status=status.HTTP_400_BAD_REQUEST
         )
     
