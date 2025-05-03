@@ -15,7 +15,7 @@ from django.db import models
 from django.db.models import Field, ForeignObjectRel
 
 
-def _get_text_choices(field_choices) -> list:
+def _get_text_choices(field_choices: list[tuple] | None) -> list[dict] | None:
     if not field_choices:
         return None
 
@@ -75,7 +75,7 @@ def get_model_fields_data(model: models.Model, is_edit: bool = False, instance =
     model_fields: list[Field[Any, Any] | ForeignObjectRel] = model._meta.get_fields()
 
     field_names: dict = {}
-    for field in model_fields:        
+    for field in model_fields:  
         if not is_model_field(field):
             continue
         initial_data = _get_field_initial_data(field, is_edit, instance)

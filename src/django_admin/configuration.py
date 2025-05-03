@@ -25,6 +25,12 @@ APP_LIST_CONFIG_OVERRIDE = {
 # - admin_url
 # - add_url
 
+# app_url - This is not really used but it is an option if you want a link and a page
+#           for your app
+# admin_url - This is the link to the listview page
+# add_url - This is the link to the add page
+
+# Sample below of how to override app list config
 if IS_DEMO_MODE:
     APP_LIST_CONFIG_OVERRIDE.update({
         # The name of the app
