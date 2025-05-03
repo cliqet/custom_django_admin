@@ -21,7 +21,7 @@ def get_jwt_config(ENV: dict) -> dict:
         'ALGORITHM': 'RS256',
         'SIGNING_KEY': get_file(ENV.application.jwt_private_key),
         'VERIFYING_KEY': get_file(ENV.application.jwt_public_key),
-        'ISSUER': 'SolidDjango',
+        'ISSUER': ENV.application.jwt_issuer,
 
         'AUTH_HEADER_TYPES': ('Bearer',),
         'USER_ID_FIELD': 'uid',

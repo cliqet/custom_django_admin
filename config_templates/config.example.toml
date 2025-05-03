@@ -97,6 +97,9 @@
   # NOTE: Use /custom_admin_backend/keys/jwt_public.pub for docker and server setup
   jwt_public_key = '.../jwt_public.pub'
 
+  # String. Required. The jwt issuer
+  jwt_issuer = ''
+
   # Int. Defaults to 20
   # Maximum results per page in api requests
   api_max_page_size = 20
