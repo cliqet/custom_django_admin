@@ -1,9 +1,12 @@
-from backend.settings.base import APP_MODE, DjangoSettings
+from backend.settings.base import IS_DEMO_MODE
 
-# from .constants import DASHBOARD_URL_PREFIX
+from .constants import DASHBOARD_URL_PREFIX
 
 APP_LIST_CONFIG_OVERRIDE = {
-    'saved_queries': {
+    'django_admin_saved_queries': {
+        'is_hidden': True,
+    },
+    'django_admin_demo': {
         'is_hidden': True,
     }
 }
@@ -22,31 +25,29 @@ APP_LIST_CONFIG_OVERRIDE = {
 # - admin_url
 # - add_url
 
-"""
-Example of overriding:
-APP_LIST_CONFIG_OVERRIDE = {
-    # The name of the app
-    'demo': {
-        'app_url': f'{DASHBOARD_URL_PREFIX}/custom',
-        'models': {
-            # The name of the model
-            'Classification': {
-                'admin_url': f'{DASHBOARD_URL_PREFIX}/custom/classification',
-                'add_url': f'{DASHBOARD_URL_PREFIX}/custom/classification/customadd',
-            },
-            'Level': {
-                'is_hidden': True  # hides the model from the app list
-            }
-            # You can add more models
-        },
-        # 'is_hidden': True  # hides the app from the app list (all models under are hidden)
-    },
-    # You can add more apps
-}
-"""
+# app_url - This is not really used but it is an option if you want a link and a page
+#           for your app
+# admin_url - This is the link to the listview page
+# add_url - This is the link to the add page
 
-# Do not override demo app for pytest
-# If you want to delete demo from the whole application, you must remove all 
-# references to it including the tests
-if APP_MODE == DjangoSettings.TEST and APP_LIST_CONFIG_OVERRIDE.get('demo'):
-    del APP_LIST_CONFIG_OVERRIDE['demo']
+# Sample below of how to override app list config
+if IS_DEMO_MODE:
+    APP_LIST_CONFIG_OVERRIDE.update({
+        # The name of the app
+        'django_admin_demo': {
+            'app_url': f'{DASHBOARD_URL_PREFIX}/custom',
+            'models': {
+                # The name of the model
+                'Classification': {
+                    'admin_url': f'{DASHBOARD_URL_PREFIX}/custom/classification',
+                    'add_url': f'{DASHBOARD_URL_PREFIX}/custom/classification/customadd',
+                },
+                'Level': {
+                    'is_hidden': True  # hides the model from the app list
+                }
+                # You can add more models
+            },
+            # 'is_hidden': True  # hides the app from the app list (all models under are hidden)
+        },
+        # You can add more apps
+    })

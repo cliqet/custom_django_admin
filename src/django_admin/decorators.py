@@ -9,7 +9,7 @@ from .constants import PermissionType
 
 def has_model_permission(model: Model, permission: PermissionType):
     """
-        Decorator to check model permissions of user
+        Decorator to check model permissions of user for admin actions
     """
     def decorator(view_func):
         @wraps(view_func)

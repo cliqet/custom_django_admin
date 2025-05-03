@@ -64,13 +64,15 @@ INSTALLED_APPS = [
 
     # user-defined apps
     'django_admin',
-    'users',
-    'documentation',
-    'saved_queries',
-    'demo', # For demo purposes only. Delete this!!!!!
+    'django_admin_users',
+    'django_admin_documentation',
+    'django_admin_saved_queries',
+
+    # For demo purposes and testing only. Set is_demo_mode config to false to hide it
+    'django_admin_demo', 
 ]
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'django_admin_users.CustomUser'
 
 # DRF settings
 REST_FRAMEWORK = {
@@ -310,6 +312,8 @@ CSRF_TRUSTED_ORIGINS = ENV.application.csrf_trusted_origins
 BRAND_NAME = ENV.application.brand_name
 
 RQ_API_TOKEN = ENV.application.rq_api_token
+
+IS_DEMO_MODE = ENV.application.is_demo_mode
 
 log.info('Base settings loaded')
 

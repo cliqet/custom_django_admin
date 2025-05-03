@@ -68,10 +68,6 @@ backups/
 # Scripts
 src/scripts/*
 !src/scripts/__init__.py
-!src/scripts/check_config.py
-!src/scripts/SCRIPTS.MD
-!src/scripts/initialize_data.py
-!src/scripts/load_zipcodes.py
 
 # Personal devtools
 frontend_tester/

@@ -46,6 +46,7 @@ class Environment:
         jwt_refresh_token_life: int = _application_env.get('jwt_refresh_token_life', 3)
         jwt_private_key: str = _application_env.get('jwt_private_key')
         jwt_public_key: str = _application_env.get('jwt_public_key')
+        jwt_issuer: str = _application_env.get('jwt_issuer')
         api_max_page_size: int = _application_env.get('max_api_page_size', 20)
         api_permission_classes: list[str] = _application_env.get(
             'api_permission_classes',
@@ -59,6 +60,7 @@ class Environment:
         csrf_trusted_origins: list[str] = _application_env.get('csrf_trusted_origins')
         brand_name: str = _application_env.get('brand_name', 'CUSTOM DJANGO ADMIN')
         rq_api_token: str = _application_env.get('rq_api_token', '')
+        is_demo_mode: bool = _application_env.get('is_demo_mode', False)
 
         
     class LoggingConfig:

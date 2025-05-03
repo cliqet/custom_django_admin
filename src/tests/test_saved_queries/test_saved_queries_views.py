@@ -1,12 +1,12 @@
 import pytest
 from django.urls import reverse
 
-from saved_queries.models import SavedQueryBuilder, SavedRawQuery
+from django_admin_saved_queries.models import SavedQueryBuilder, SavedRawQuery
 
 data = {
     'name': 'myquery',
     "query": {
-        "app_name": "demo",
+        "app_name": "django_admin_demo",
         "model_name": "DemoModel",
         "conditions": [
             [
@@ -25,7 +25,7 @@ data = {
 
 raw_query_data = {
     'name': 'myquery',
-    'query': 'select * from demo_demomodel;'
+    'query': 'select * from django_admin_demo_demomodel;'
 }
 
 @pytest.fixture
@@ -78,7 +78,7 @@ def test_query_builder_invalid_body(api_client, limited_admin_token):
 def test_query_builder_valid_body(api_client, limited_admin_token):
     client = api_client()
     data = {
-        "app_name": "demo",
+        "app_name": "django_admin_demo",
         "model_name": "DemoModel",
         "conditions": [
             [

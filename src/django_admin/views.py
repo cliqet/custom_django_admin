@@ -13,12 +13,11 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
 from django_admin.decorators import has_model_permission
-from django_admin.permissions import IsSuperUser, has_user_permission
+from django_admin.permissions import IsActiveAdminUser, IsSuperUser, has_user_permission
 from services.cloudflare import verify_token
 from services.queue_service import (
     delete_jobs,
@@ -30,7 +29,7 @@ from services.queue_service import (
 
 from .actions import ACTIONS
 from .configuration import APP_LIST_CONFIG_OVERRIDE
-from .constants import DASHBOARD_URL_PREFIX
+from .constants import DASHBOARD_URL_PREFIX, ModelField
 from .data_transform import transform_dict_to_camel_case
 from .docs import (
     ADD_CHANGE_MODEL_RECORD_ERROR_DOC,
@@ -56,16 +55,16 @@ from .docs import (
     VERIFY_CLOUDFLARE_TOKEN_ERROR_DOC,
 )
 from .serializers import (
-    AppSerializer,
-    ContentTypeSerializer,
-    GroupSerializer,
-    LogEntrySerializer,
-    ModelAdminSettingsSerializer,
-    ModelFieldSerializer,
-    PermissionSerializer,
-    QueuedJobSerializer,
-    RequeueOrDeleteJobsBodySerializer,
-    VerifyTokenBodySerializer,
+    AdminAppSerializer,
+    AdminContentTypeSerializer,
+    AdminGroupSerializer,
+    AdminLogEntrySerializer,
+    AdminModelAdminSettingsSerializer,
+    AdminModelFieldSerializer,
+    AdminPermissionSerializer,
+    AdminQueuedJobSerializer,
+    AdminRequeueOrDeleteJobsBodySerializer,
+    AdminVerifyTokenBodySerializer,
 )
 from .util_models import (
     get_converted_pk,
@@ -85,13 +84,13 @@ log = logging.getLogger(__name__)
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=AppSerializer,
+            response=AdminAppSerializer,
             description=GET_APPS_DOC
         ),
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_apps(request):
     app_list = site.get_app_list(request)
 
@@ -150,14 +149,14 @@ def get_apps(request):
     
         new_app_list.append(new_app)
     return Response(transform_dict_to_camel_case({
-        'app_list': AppSerializer(new_app_list, many=True).data
+        'app_list': AdminAppSerializer(new_app_list, many=True).data
     }), status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=ModelFieldSerializer,
+            response=AdminModelFieldSerializer,
             description=GET_MODEL_FIELDS_DOC
         ),
         status.HTTP_404_NOT_FOUND: OpenApiResponse(
@@ -166,7 +165,7 @@ def get_apps(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_fields(request, app_label: str, model_name: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -195,7 +194,7 @@ def get_model_fields(request, app_label: str, model_name: str):
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=ModelAdminSettingsSerializer,
+            response=AdminModelAdminSettingsSerializer,
             description=GET_MODEL_ADMIN_SETTINGS_DOC
         ),
         status.HTTP_404_NOT_FOUND: OpenApiResponse(
@@ -204,7 +203,7 @@ def get_model_fields(request, app_label: str, model_name: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_admin_settings(request, app_label: str, model_name: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -231,7 +230,7 @@ def get_model_admin_settings(request, app_label: str, model_name: str):
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=ModelFieldSerializer,
+            response=AdminModelFieldSerializer,
             description=GET_MODEL_FIELDS_DOC
         ),
         status.HTTP_404_NOT_FOUND: OpenApiResponse(
@@ -240,7 +239,7 @@ def get_model_admin_settings(request, app_label: str, model_name: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_fields_edit(request, app_label: str, model_name: str, pk: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -276,74 +275,74 @@ def get_model_fields_edit(request, app_label: str, model_name: str, pk: str):
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=PermissionSerializer,
+            response=AdminPermissionSerializer,
             description=GET_PERMISSIONS_DOC
         ),
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_permissions(request):
     permissions = Permission.objects.all()
 
     return Response(transform_dict_to_camel_case({
-        'permissions': PermissionSerializer(permissions, many=True).data
+        'permissions': AdminPermissionSerializer(permissions, many=True).data
     }), status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=ContentTypeSerializer,
+            response=AdminContentTypeSerializer,
             description=GET_CONTENT_TYPES_DOC
         ),
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_content_types(request):
     content_types = ContentType.objects.all()
 
     return Response(transform_dict_to_camel_case({
-        'content_types': ContentTypeSerializer(content_types, many=True).data
+        'content_types': AdminContentTypeSerializer(content_types, many=True).data
     }), status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=GroupSerializer,
+            response=AdminGroupSerializer,
             description=GET_GROUPS_DOC
         ),
     }
 )
 @api_view(['GET'])
 @has_model_permission(Group, 'view')
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_groups(request):
     groups = Group.objects.all()
 
     return Response(transform_dict_to_camel_case({
-        'groups': GroupSerializer(groups, many=True).data
+        'groups': AdminGroupSerializer(groups, many=True).data
     }), status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=LogEntrySerializer,
+            response=AdminLogEntrySerializer,
             description=GET_LOG_ENTRIES_DOC
         ),
     }
 )
 @api_view(['GET'])
 @has_model_permission(LogEntry, 'view')
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_log_entries(request):
     log_entries = LogEntry.objects.all()
 
     return Response(transform_dict_to_camel_case({
-        'log_entries': LogEntrySerializer(log_entries, many=True).data
+        'log_entries': AdminLogEntrySerializer(log_entries, many=True).data
     }), status=status.HTTP_200_OK)
 
 
@@ -358,7 +357,7 @@ def get_log_entries(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_record(request, app_label: str, model_name: str, pk: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -392,7 +391,7 @@ def get_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def change_model_record(request, app_label: str, model_name: str, pk: str):
     boolean_values = {
         'true': True,
@@ -419,12 +418,16 @@ def change_model_record(request, app_label: str, model_name: str, pk: str):
         if post_body_serializer.is_valid():
             instance_data = {}
             for key, value in body.items():
-                if model_fields_data.get(key).get('type') == 'ManyToManyField':
+                if model_fields_data.get(key).get('type') == ModelField.ManyToManyField:
                     if value:
                         instance_data[key] = value.split(',')
-                elif model_fields_data.get(key).get('type') == 'BooleanField':
+                elif model_fields_data.get(key).get('type') == ModelField.BooleanField:
                     instance_data[key] = boolean_values[value]
-                elif model_fields_data.get(key).get('type') in ['FileField', 'ImageField']:
+                elif model_fields_data.get(key).get('type') == ModelField.JSONField:
+                    instance_data[key] = json.loads(value)
+                elif model_fields_data.get(key).get('type') in [
+                    ModelField.FileField, ModelField.ImageField
+                ]:
                     # If no file was passed, it must not be required
                     if value == '':
                         continue
@@ -461,11 +464,11 @@ def change_model_record(request, app_label: str, model_name: str, pk: str):
                 if hasattr(instance, key):
                     field_type = model_fields_data.get(key).get('type')
                     
-                    if field_type == 'ManyToManyField':
+                    if field_type == ModelField.ManyToManyField:
                         # Update ManyToManyField relationships
                         getattr(instance, key).set(related_pk)  # Use getattr to call set() dynamically
                         
-                    elif field_type in ['ForeignKey', 'OneToOneField']:
+                    elif field_type in [ModelField.ForeignKey, ModelField.OneToOneField]:
                         # Retrieve the related instance using the provided pk
                         related_model = model._meta.get_field(key).related_model
                         instance_type = related_model.objects.get(pk=related_pk)  # Ensure value is the correct pk
@@ -520,7 +523,7 @@ def change_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def delete_model_record(request, app_label: str, model_name: str, pk: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -533,7 +536,8 @@ def delete_model_record(request, app_label: str, model_name: str, pk: str):
         instance.delete()
 
         return Response({
-            'message': f'Deleted record [{instance.__str__()}] with pk {pk} successfully'
+            'message': f'Deleted record [{instance.__str__()}] with pk {pk} successfully',
+            'has_error': False
         }, status=status.HTTP_202_ACCEPTED)
     except Exception as e:
         log.error(f'Error: {str(e)}')
@@ -555,7 +559,7 @@ def delete_model_record(request, app_label: str, model_name: str, pk: str):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def add_model_record(request, app_label: str, model_name: str):
     boolean_values = {
         'true': True,
@@ -586,14 +590,20 @@ def add_model_record(request, app_label: str, model_name: str):
 
             for key, value in body.items():
                 # store many to many field list first if there is data and not an empty string
-                if model_fields_data.get(key).get('type') == 'ManyToManyField':
+                if model_fields_data.get(key).get('type') == ModelField.ManyToManyField:
                     if value:
                         many_to_many_data[key] = value.split(',')
-                elif model_fields_data.get(key).get('type') in ['ForeignKey', 'OneToOneField']:
+                elif model_fields_data.get(key).get('type') in [
+                    ModelField.ForeignKey, ModelField.OneToOneField
+                ]:
                     foreignkey_data[key] = value
-                elif model_fields_data.get(key).get('type') == 'BooleanField':
+                elif model_fields_data.get(key).get('type') == ModelField.BooleanField:
                     instance_data[key] = boolean_values[value]
-                elif model_fields_data.get(key).get('type') in ['FileField', 'ImageField']:
+                elif model_fields_data.get(key).get('type') == ModelField.JSONField:
+                    instance_data[key] = json.loads(value)
+                elif model_fields_data.get(key).get('type') in [
+                    ModelField.FileField, ModelField.ImageField
+                ]:
                     # If no file was passed, it must not be required
                     if value == '':
                         continue
@@ -677,7 +687,8 @@ def add_model_record(request, app_label: str, model_name: str):
             instance.refresh_from_db()
 
             return Response({
-                'message': f'Created record [{instance.__str__()}] with pk {instance.pk} successfully'
+                'message': f'Created record [{instance.__str__()}] with pk {instance.pk} successfully',
+                'pk': instance.pk
             }, status=status.HTTP_201_CREATED)
         
         # If there are serialization errors
@@ -718,7 +729,7 @@ def add_model_record(request, app_label: str, model_name: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_model_listview(request, app_label: str, model_name: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
@@ -799,7 +810,7 @@ def get_model_listview(request, app_label: str, model_name: str):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def custom_action_view(request, app_label: str, model_name: str, func: str):
     try:
         body = request.data
@@ -815,13 +826,14 @@ def custom_action_view(request, app_label: str, model_name: str, func: str):
         return action_response
     except Exception as e:
         log.error(f'Error in custom action view: {e}')
+
         return Response(
-            None,
+            {'message': f'An error occured while performing {func}'},
             status=status.HTTP_400_BAD_REQUEST
         )
     
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsActiveAdminUser])
 def get_inline_listview(request, parent_app_label: str, parent_model_name: str, change_obj_pk: str):
     try:
         model = get_model(f'{parent_app_label}.{parent_model_name}')
@@ -875,7 +887,7 @@ def get_inline_listview(request, parent_app_label: str, parent_model_name: str, 
 
 
 @extend_schema(
-    request=VerifyTokenBodySerializer,
+    request=AdminVerifyTokenBodySerializer,
     responses={
         status.HTTP_202_ACCEPTED: OpenApiResponse(
             description=VERIFY_CLOUDFLARE_TOKEN_DOC
@@ -889,7 +901,7 @@ def get_inline_listview(request, parent_app_label: str, parent_model_name: str, 
 def verify_cloudflare_token(request):
     try:
         body = request.data
-        serialized_body = VerifyTokenBodySerializer(data=body)
+        serialized_body = AdminVerifyTokenBodySerializer(data=body)
 
         if serialized_body.is_valid():
             token = body.get('token')
@@ -918,7 +930,7 @@ def verify_cloudflare_token(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def get_worker_queues(request):
     try:
         queues = get_queue_list()
@@ -942,11 +954,11 @@ def get_worker_queues(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def get_failed_queued_jobs(request, queue_name: str):
     try:
         jobs = get_failed_jobs(queue_name)
-        serialized_jobs = QueuedJobSerializer(jobs, many=True).data
+        serialized_jobs = AdminQueuedJobSerializer(jobs, many=True).data
 
         return Response({
             'failed_jobs': {
@@ -975,13 +987,13 @@ def get_failed_queued_jobs(request, queue_name: str):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def get_queued_job(request, queue_name: str, job_id: str):
     try:
         job = get_job(queue_name, job_id)
 
         return Response({
-            'job': QueuedJobSerializer(job).data,
+            'job': AdminQueuedJobSerializer(job).data,
         }, status=status.HTTP_200_OK)
     except Exception as e:
         log.error(f'Error retrieving job id {job_id} from queue {queue_name}: {str(e)}')
@@ -993,7 +1005,7 @@ def get_queued_job(request, queue_name: str, job_id: str):
 
 
 @extend_schema(
-    request=RequeueOrDeleteJobsBodySerializer,
+    request=AdminRequeueOrDeleteJobsBodySerializer,
     responses={
         status.HTTP_201_CREATED: OpenApiResponse(
             description=REQUEUE_FAILED_JOB_DOC
@@ -1001,11 +1013,11 @@ def get_queued_job(request, queue_name: str, job_id: str):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def requeue_failed_jobs(request):
     try:
         body = request.data
-        data = RequeueOrDeleteJobsBodySerializer(data=body)
+        data = AdminRequeueOrDeleteJobsBodySerializer(data=body)
         if not data.is_valid():
             return Response({
                 'success': False,
@@ -1037,7 +1049,7 @@ def requeue_failed_jobs(request):
     
 
 @extend_schema(
-    request=RequeueOrDeleteJobsBodySerializer,
+    request=AdminRequeueOrDeleteJobsBodySerializer,
     responses={
         status.HTTP_200_OK: OpenApiResponse(
             description=GET_QUEUED_JOB_DOC
@@ -1045,11 +1057,11 @@ def requeue_failed_jobs(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsActiveAdminUser, IsSuperUser])
 def delete_queued_jobs(request):
     try:
         body = request.data
-        data = RequeueOrDeleteJobsBodySerializer(data=body)
+        data = AdminRequeueOrDeleteJobsBodySerializer(data=body)
         if not data.is_valid():
             return Response({
                 'success': False,

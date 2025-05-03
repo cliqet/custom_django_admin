@@ -21,7 +21,7 @@ class ModelDocumentation(BaseCachedModel):
         Accessible via /<admin_dashboard_prefix>/model-docs
     """
     CACHE_KEY_PREFIX = 'ModelDocs'
-    serializer_classname = 'ModelDocumentationSerializer'
+    admin_serializer_classname = 'AdminModelDocumentationSerializer'
 
     app_model_name = models.CharField(
         max_length=50, 

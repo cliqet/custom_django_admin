@@ -15,13 +15,13 @@ def get_jwt_config(ENV: dict) -> dict:
         'BLACKLIST_AFTER_ROTATION': True,  # True makes sure old refresh token cannot be used anymore
 
         # Custom token serializer
-        "TOKEN_OBTAIN_SERIALIZER": "users.serializers.UserObtainPairSerializer",
+        "TOKEN_OBTAIN_SERIALIZER": "django_admin_users.serializers.AdminUserObtainPairSerializer",
 
         # 'ALGORITHM': 'HS256',
         'ALGORITHM': 'RS256',
         'SIGNING_KEY': get_file(ENV.application.jwt_private_key),
         'VERIFYING_KEY': get_file(ENV.application.jwt_public_key),
-        'ISSUER': 'SolidDjango',
+        'ISSUER': ENV.application.jwt_issuer,
 
         'AUTH_HEADER_TYPES': ('Bearer',),
         'USER_ID_FIELD': 'uid',

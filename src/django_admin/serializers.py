@@ -8,7 +8,7 @@ from rest_framework_simplejwt.token_blacklist.models import (
 )
 
 
-class BaseModelSerializer(serializers.ModelSerializer):
+class AdminBaseModelSerializer(serializers.ModelSerializer):
     """
         Use for all ModelSerializer implementations since it formats related models
         in a way where it will have the pk and a string representation instead of just
@@ -42,94 +42,94 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
 
 # Serializer for individual models in the app
-class ModelPermSerializer(serializers.Serializer):
+class AdminModelPermSerializer(serializers.Serializer):
     add = serializers.BooleanField()
     change = serializers.BooleanField()
     delete = serializers.BooleanField()
     view = serializers.BooleanField()
 
 
-class AppModelSerializer(serializers.Serializer):
+class AdminAppModelSerializer(serializers.Serializer):
     name = serializers.CharField()
     object_name = serializers.CharField()
     admin_url = serializers.CharField()
     add_url = serializers.CharField(allow_blank=True)
-    perms = ModelPermSerializer()
+    perms = AdminModelPermSerializer()
     view_only = serializers.BooleanField()
 
 # Serializer for the app
-class AppSerializer(serializers.Serializer):
+class AdminAppSerializer(serializers.Serializer):
     name = serializers.CharField()
     app_label = serializers.CharField()
     app_url = serializers.CharField()
     has_module_perms = serializers.BooleanField()
-    models = serializers.ListField(child=AppModelSerializer())
+    models = serializers.ListField(child=AdminAppModelSerializer())
 
 
-class ContentTypeSerializer(serializers.Serializer):
+class AdminContentTypeSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     app_label = serializers.CharField()
     model = serializers.CharField()
 
 
-class PermissionSerializer(serializers.Serializer):
+class AdminPermissionSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     codename = serializers.CharField()
-    content_type = ContentTypeSerializer()
+    content_type = AdminContentTypeSerializer()
 
 
-class GroupSerializer(BaseModelSerializer):
+class AdminGroupSerializer(AdminBaseModelSerializer):
     class Meta:
         model = Group
         fields = '__all__'
 
 
-class LogEntrySerializer(BaseModelSerializer):
+class AdminLogEntrySerializer(AdminBaseModelSerializer):
     class Meta:
         model = LogEntry
         fields = '__all__'
 
 
-class SessionSerializer(BaseModelSerializer):
+class AdminSessionSerializer(AdminBaseModelSerializer):
     class Meta:
         model = Session
         fields = '__all__'
 
 
 # 3rd party apps =================================================================
-class BlacklistedTokenSerializer(BaseModelSerializer):
+class AdminBlacklistedTokenSerializer(AdminBaseModelSerializer):
     class Meta:
         model = BlacklistedToken
         fields = '__all__'
 
 
-class OutstandingTokenSerializer(BaseModelSerializer):
+class AdminOutstandingTokenSerializer(AdminBaseModelSerializer):
     class Meta:
         model = OutstandingToken
         fields = '__all__'
 
 # =================================================================
 
-class ForeignKeyChoiceSerializer(serializers.Serializer):
+class AdminForeignKeyChoiceSerializer(serializers.Serializer):
     value = serializers.CharField()  # Accepts both numbers and strings
     label = serializers.CharField()
     selected = serializers.BooleanField()
 
 
-class ManyToManyChoiceSerializer(serializers.Serializer):
+class AdminManyToManyChoiceSerializer(serializers.Serializer):
     id = serializers.CharField()  # Accepts both numbers and strings
     label = serializers.CharField()
     checked = serializers.BooleanField()
 
 
-class FieldAttributeChoiceSerializer(serializers.Serializer):
+class AdminFieldAttributeChoiceSerializer(serializers.Serializer):
     label = serializers.CharField()
     value = serializers.JSONField()  # Any value depending on the field type
     selected = serializers.BooleanField()
 
 
-class FieldAttributeSerializer(serializers.Serializer):
+class AdminFieldAttributeSerializer(serializers.Serializer):
     name = serializers.CharField()
     label = serializers.CharField()
     is_primary_key = serializers.BooleanField()
@@ -140,7 +140,7 @@ class FieldAttributeSerializer(serializers.Serializer):
     type = serializers.CharField()
     initial = serializers.CharField(allow_null=True)
     required = serializers.BooleanField()
-    choices = serializers.ListField(child=FieldAttributeChoiceSerializer(), required=False, allow_null=True)
+    choices = serializers.ListField(child=AdminFieldAttributeChoiceSerializer(), required=False, allow_null=True)
     min_value = serializers.IntegerField(allow_null=True)
     max_value = serializers.IntegerField(allow_null=True)
 
@@ -149,33 +149,33 @@ class FieldAttributeSerializer(serializers.Serializer):
     regex_pattern = serializers.CharField(required=False)
     regex_message = serializers.CharField(required=False)
     foreignkey_choices = serializers.ListField(
-        child=ForeignKeyChoiceSerializer(), required=False, allow_null=True
+        child=AdminForeignKeyChoiceSerializer(), required=False, allow_null=True
     )
     foreignkey_model = serializers.CharField(required=False, allow_blank=True)
     foreignkey_app = serializers.CharField(required=False, allow_blank=True)
     
     manytomany_choices = serializers.ListField(
-        child=ManyToManyChoiceSerializer(), required=False, allow_null=True
+        child=AdminManyToManyChoiceSerializer(), required=False, allow_null=True
     )
     manytomany_related_app = serializers.CharField(required=False, allow_blank=True)
     manytomany_related_model = serializers.CharField(required=False, allow_blank=True)
 
 
-class ModelFieldSerializer(serializers.Serializer):
-    fields = serializers.DictField(child=FieldAttributeSerializer())
+class AdminModelFieldSerializer(serializers.Serializer):
+    fields = serializers.DictField(child=AdminFieldAttributeSerializer())
 
 
-class FieldsetSerializer(serializers.Serializer):
+class AdminFieldsetSerializer(serializers.Serializer):
     title = serializers.CharField()
     fields = serializers.ListField(child=serializers.CharField())
 
 
-class CustomActionSerializer(serializers.Serializer):
+class AdminCustomActionSerializer(serializers.Serializer):
     func = serializers.CharField()
     label = serializers.CharField()
 
 
-class CustomInlineSerializer(serializers.Serializer):
+class AdminCustomInlineSerializer(serializers.Serializer):
     app_label = serializers.CharField()
     model_name = serializers.CharField()
     model_name_label = serializers.CharField()
@@ -190,20 +190,20 @@ class CustomInlineSerializer(serializers.Serializer):
         return obj.__name__
 
 
-class TableFilterValueSerializer(serializers.Serializer):
+class AdminTableFilterValueSerializer(serializers.Serializer):
     value = serializers.CharField(allow_null=True)
     label = serializers.CharField()
 
 
-class TableFilterSerializer(serializers.Serializer):
+class AdminTableFilterSerializer(serializers.Serializer):
     field = serializers.CharField()
-    values = serializers.ListField(child=TableFilterValueSerializer())
+    values = serializers.ListField(child=AdminTableFilterValueSerializer())
 
 
-class ModelAdminSettingsSerializer(serializers.Serializer):
+class AdminModelAdminSettingsSerializer(serializers.Serializer):
     model_name = serializers.CharField()
     app_label = serializers.CharField()
-    fieldsets = FieldsetSerializer()
+    fieldsets = AdminFieldsetSerializer()
     list_display = serializers.ListField(child=serializers.CharField())
     list_per_page = serializers.IntegerField()
     list_display_links = serializers.ListField(child=serializers.CharField())
@@ -212,18 +212,18 @@ class ModelAdminSettingsSerializer(serializers.Serializer):
     ordering = serializers.ListField(child=serializers.CharField())
     autocomplete_fields = serializers.ListField(child=serializers.CharField())
     readonly_fields = serializers.ListField(child=serializers.CharField())
-    custom_actions = serializers.ListField(child=CustomActionSerializer())
-    custom_inlines = serializers.ListField(child=CustomInlineSerializer())
-    table_filters = serializers.ListField(child=TableFilterSerializer())
+    custom_actions = serializers.ListField(child=AdminCustomActionSerializer())
+    custom_inlines = serializers.ListField(child=AdminCustomInlineSerializer())
+    table_filters = serializers.ListField(child=AdminTableFilterSerializer())
     extra_inlines = serializers.ListField(child=serializers.CharField())
     custom_change_link = serializers.CharField()
 
 
-class VerifyTokenBodySerializer(serializers.Serializer):
+class AdminVerifyTokenBodySerializer(serializers.Serializer):
     token = serializers.CharField()
 
 
-class QueuedJobSerializer(serializers.Serializer):
+class AdminQueuedJobSerializer(serializers.Serializer):
     id = serializers.CharField()
     created_at = serializers.DateTimeField()
     started_at = serializers.DateTimeField()
@@ -238,7 +238,7 @@ class QueuedJobSerializer(serializers.Serializer):
     execution_info = serializers.CharField()
 
 
-class RequeueOrDeleteJobsBodySerializer(serializers.Serializer):
+class AdminRequeueOrDeleteJobsBodySerializer(serializers.Serializer):
     queue_name = serializers.CharField()
     job_ids = serializers.ListField(child=serializers.CharField())
 

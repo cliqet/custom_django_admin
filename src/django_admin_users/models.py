@@ -44,7 +44,10 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    serializer_classname = 'CustomUserDetailsSerializer'
+    """
+    Extend this user class to create your own User instance
+    """
+    admin_serializer_classname = 'AdminCustomUserDetailsSerializer'
     
     uid = models.CharField(
         max_length=255, 

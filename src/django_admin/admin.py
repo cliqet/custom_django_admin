@@ -1,5 +1,3 @@
-from enum import Enum
-
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group
@@ -11,23 +9,32 @@ from rest_framework_simplejwt.token_blacklist.models import (
     OutstandingToken,
 )
 
+from backend.settings.base import IS_DEMO_MODE
 from django_admin.util_models import get_model
 
 from .constants import LIST_PAGE_COUNT
 
 # Add serializer class property to builtin Django models and 3rd party apps
 # Handled in common.util_serializers.get_dynamic_serializer
-LogEntry.serializer_classname = 'LogEntrySerializer'
-Group.serializer_classname = 'GroupSerializer'
-BlacklistedToken.serializer_classname = 'BlacklistedTokenSerializer'
-OutstandingToken.serializer_classname = 'OutstandingTokenSerializer'
+LogEntry.admin_serializer_classname = 'AdminLogEntrySerializer'
+Group.admin_serializer_classname = 'AdminGroupSerializer'
+BlacklistedToken.admin_serializer_classname = 'AdminBlacklistedTokenSerializer'
+OutstandingToken.admin_serializer_classname = 'AdminOutstandingTokenSerializer'
 
 
-class CUSTOM_ACTIONS(Enum):
+class CUSTOM_ACTIONS:
     """
         Define all custom action names here
     """
+    # Automatically applied to all models
     DELETE_LISTVIEW = 'delete'
+
+    # Put individual actions for models here
+
+
+# For demo only and can be deleted
+if IS_DEMO_MODE:
+    CUSTOM_ACTIONS.COPY_DEMO_MODEL = 'copy_demo_model'
 
 
 class BaseModelAdmin(admin.ModelAdmin):
@@ -48,7 +55,7 @@ class BaseModelAdmin(admin.ModelAdmin):
     # Extend these
     readonly_fields = ['created_at', 'updated_at']
     custom_actions = [{
-        'func': CUSTOM_ACTIONS.DELETE_LISTVIEW.value,
+        'func': CUSTOM_ACTIONS.DELETE_LISTVIEW,
         'label': 'Delete selected records'
     }]
     custom_inlines = []

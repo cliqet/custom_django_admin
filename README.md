@@ -130,6 +130,9 @@ To learn more about the apis your frontend can consume, go to
 
 ### How to Use
 
+### View existing demo apps and models
+You can view all models under the django_admin_demo by setting the config `is_demo_mode` to `true`. You only need to set this to `false` and it will not show in the current admin. You may delete this app and models but take note that all tests use this so make sure to adjust the tests or completely delete the existing tests.
+
 #### Creating a model and register in admin
 We will use the demo app as our guide. First, create your model
 ```python
@@ -194,12 +197,12 @@ class DemoModel(BaseModel):
 It inherits from `BaseModel`. Use this so that you do not need to add 
 `created_at` and `updated_at` fields. 
 
-All your models should have a `serializer_classname` property and must have 
+All your models should have an `admin_serializer_classname` property and must have 
 the corresponding serializer class defined in the `serializers.py` in the 
-same app directory. Use the `BaseModelSerializer`
+same app directory in order to dynamically serialize any model. Use the `AdminBaseModelSerializer`. Separate your admin serializers with your frontend facing website. Look at `django_admin_demo.admin` and `django_admin_demo.serializers` for examples.
 
 ```python
-class DemoModelSerializer(BaseModelSerializer):
+class DemoModelSerializer(AdminBaseModelSerializer):
     class Meta:
         model = DemoModel
         fields = '__all__'
@@ -297,6 +300,7 @@ custom_actions = [{
 }]
 ```
 The dict should have the `func` which is the identifier of the action and a `label` which is the one shown in the dropdown menu. You would need to provide a view if you would like to add more custom actions. Just follow the pattern used by the delete listview builtin function. Refer to `django_admin.actions` for more details.
+There is a utility function `copy_record` that can dynamically copy records including related instances and handles recursive instances such as foreign keys to self. Refer to copy demo model action for how to use it to add copy actions to your models.
 
 
 ### Documenting the admin site

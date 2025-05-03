@@ -12,7 +12,7 @@ from django_admin.util_models import build_filefield_helptext
 
 
 class Type(BaseModel):
-    serializer_classname = 'TypeSerializer'
+    admin_serializer_classname = 'AdminTypeSerializer'
 
     name = models.CharField(max_length=100, verbose_name='Name')
 
@@ -21,7 +21,7 @@ class Type(BaseModel):
     
 
 class Classification(BaseModel):
-    serializer_classname = 'ClassificationSerializer'
+    admin_serializer_classname = 'AdminClassificationSerializer'
 
     name = models.CharField(max_length=100, verbose_name='Name')
 
@@ -30,7 +30,7 @@ class Classification(BaseModel):
 
 
 class DemoModel(BaseModel):
-    serializer_classname = 'DemoModelSerializer'
+    admin_serializer_classname = 'AdminDemoModelSerializer'
 
     class ColorChoices(models.TextChoices):
         BLUE = ('Blue', 'Blue')
@@ -89,7 +89,7 @@ class DemoModel(BaseModel):
     
 
 class Level(BaseModel):
-    serializer_classname = 'LevelSerializer'
+    admin_serializer_classname = 'AdminLevelSerializer'
 
     name = models.CharField(max_length=10, help_text='Enter level')
 
@@ -98,7 +98,7 @@ class Level(BaseModel):
     
 
 class Country(BaseModel):
-    serializer_classname = 'CountrySerializer'
+    admin_serializer_classname = 'AdminCountrySerializer'
 
     class Meta:
         verbose_name_plural = 'Countries'
@@ -109,7 +109,7 @@ class Country(BaseModel):
     
 
 class CountryProfile(BaseModel):
-    serializer_classname = 'CountryProfileSerializer'
+    admin_serializer_classname = 'AdminCountryProfileSerializer'
 
     country = models.OneToOneField(Country, on_delete=models.CASCADE, help_text='Select country')
     level = models.ForeignKey(Level, on_delete=models.CASCADE, help_text='Select level')

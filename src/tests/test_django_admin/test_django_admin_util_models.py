@@ -2,7 +2,6 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.base import ModelBase
 
-from demo.models import DemoModel
 from django_admin.util_models import (
     _get_field_initial_data,
     _get_text_choices,
@@ -13,9 +12,10 @@ from django_admin.util_models import (
     get_model_fields_data,
     is_valid_modelfield_file,
 )
+from django_admin_demo.models import DemoModel
 
 
-def test__get_text_choices(demo_model_instance):
+def test_get_text_choices(demo_model_instance):
     fields = demo_model_instance._meta.get_fields()
     for field in fields:
         if not field.choices:
@@ -71,7 +71,7 @@ def test_get_model_fields_data(demo_model_instance):
     assert 'foreignkey_string' in data.get('type')
 
 def test_get_model():
-    model = get_model('demo.demomodel')
+    model = get_model('django_admin_demo.demomodel')
     assert isinstance(model, ModelBase)
 
 def test_build_filefield_helptext():
@@ -91,7 +91,7 @@ def test_is_valid_modelfield_file():
     filefield_helptext = "Allowed file types: ['.jpg', '.jpeg'] | Max file size in MB: [2]"
     content_size = 1024 
     valid_size_content = b'0' * (content_size * 2)
-    invalid_size_content = b'0' * (content_size * 3)
+    invalid_size_content = b'0' * (content_size * content_size * 2 + 1)  # 2mb + 1 byte
 
     valid_image = SimpleUploadedFile(
         name='test_image.jpg',

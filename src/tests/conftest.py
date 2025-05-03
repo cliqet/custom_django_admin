@@ -7,8 +7,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from backend.settings.base import APP_MODE, DjangoSettings
-from demo.models import Classification, DemoModel, Type
-from users.models import CustomUser, generate_user_id
+from django_admin_demo.models import Classification, DemoModel, Type
+from django_admin_users.models import CustomUser, generate_user_id
 
 
 @pytest.fixture(scope='session', autouse=True)
