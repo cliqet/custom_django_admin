@@ -1,10 +1,20 @@
 from django.contrib import admin
 
+from backend.settings.base import IS_DEMO_MODE
 from django_admin.admin import CUSTOM_ACTIONS, BaseCustomInline, BaseModelAdmin
 from django_admin.constants import DASHBOARD_URL_PREFIX
 
 from .models import Classification, Country, CountryProfile, DemoModel, Level, Type
 
+if IS_DEMO_MODE:
+    demo_action = [
+        {
+            'func': CUSTOM_ACTIONS.COPY_DEMO_MODEL,
+            'label': 'Copy Demo Model'
+        }
+    ]
+else:
+    demo_action = []
 
 # It is possible for non-related models to be inlines
 class CountryProfileCustomInline(BaseCustomInline):
@@ -93,12 +103,7 @@ class DemoModelAdmin(BaseModelAdmin):
             ),
         }),
     )
-    custom_actions = BaseModelAdmin.custom_actions + [
-        {
-            'func': CUSTOM_ACTIONS.COPY_DEMO_MODEL,
-            'label': 'Copy Demo Model'
-        }
-    ]
+    custom_actions = BaseModelAdmin.custom_actions + demo_action
 
 
 class LevelAdmin(BaseModelAdmin):
