@@ -91,6 +91,13 @@ def create_post_body_model_serializer(model_fields_data: dict, is_editing: bool 
                 required=data.get('required')
             )
 
+        elif data.get('type') == ModelField.SlugField:
+            serializer_fields[field_name] = serializers.SlugField(
+                max_length=data.get('max_length'),
+                min_length=1 if data.get('required') else None,
+                required=data.get('required')
+            )
+
         elif data.get('type') in [
             ModelField.IntegerField, 
             ModelField.PositiveIntegerField,

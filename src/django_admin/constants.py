@@ -31,3 +31,4 @@ class ModelField:
     OneToOneField = 'OneToOneField'
     TextField = 'TextField'
     ForeignKey = 'ForeignKey'
+    SlugField = 'SlugField'
