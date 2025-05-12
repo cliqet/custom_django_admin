@@ -1,7 +1,7 @@
 import re
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 
 from django.apps import apps
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -13,6 +13,8 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import Field, ForeignObjectRel
+
+PK_FIELD = Literal['pk', 'id']
 
 
 def _get_text_choices(field_choices: list[tuple] | None) -> list[dict] | None:
@@ -34,6 +36,19 @@ def _verbose_name_capitalize(text: str) -> str:
         return text
     return text.title()
 
+def get_pk_or_id_value(obj) -> Any:
+    try:
+        return getattr(obj, 'pk')
+    except Exception:
+        return getattr(obj, 'id')
+    
+def get_pk_field(obj) -> PK_FIELD:
+    try:
+        obj.pk
+        return 'pk'
+    except Exception:
+        return 'id'
+
 def _get_field_initial_data(field, is_edit: bool, instance):
     """
         Gets a model field's initial data. Uses default field value on add mode.
@@ -43,7 +58,8 @@ def _get_field_initial_data(field, is_edit: bool, instance):
         return field.get_default() if field.name != 'uid' else ''
     else:
         if isinstance(field, models.ForeignKey) or isinstance(field, models.OneToOneField):
-            return getattr(instance, field.name).pk
+            related_instance = getattr(instance, field.name)
+            return get_pk_or_id_value(related_instance) if related_instance else None
         else:
             value = getattr(instance, field.name)
             if isinstance(value, (datetime, date, time)):
@@ -79,6 +95,7 @@ def get_model_fields_data(model: models.Model, is_edit: bool = False, instance =
         if not is_model_field(field):
             continue
         initial_data = _get_field_initial_data(field, is_edit, instance)
+        print('FIELD', field, 'with initial data', initial_data)
 
         if field.concrete:
             field_names[field.name] = {
@@ -102,19 +119,19 @@ def get_model_fields_data(model: models.Model, is_edit: bool = False, instance =
             if not is_edit:
                 all_choices = [
                     {
-                        'id': obj.pk,
+                        'id': get_pk_or_id_value(obj),
                         'label': str(obj),
                         'checked': False
                     } 
                     for obj in field.remote_field.model.objects.all()
                 ]
             else:
-                # use the existing value as the selected ones
+                # use the existing value as the selected one
                 all_choices = [
                     {
-                        'id': obj.pk,
+                        'id': get_pk_or_id_value(obj),
                         'label': str(obj),
-                        'checked': True if obj.pk in initial_data else False
+                        'checked': True if get_pk_or_id_value(obj) in initial_data else False
                     } 
                     for obj in field.remote_field.model.objects.all()
                 ]
@@ -126,33 +143,46 @@ def get_model_fields_data(model: models.Model, is_edit: bool = False, instance =
         is_select_field = isinstance(field, models.ForeignKey) or isinstance(field, models.OneToOneField)
         if is_select_field:
             # Get all available options for selection
-            if not is_edit:
+            if not initial_data:
                 all_choices = [
                     {
-                        'value': obj.pk,
+                        'value': get_pk_or_id_value(obj),
                         'label': str(obj),
                         'selected': False if index != 0 else True
                     } 
                     for index, obj in enumerate(field.remote_field.model.objects.all())
                 ]
             else:
-                # use the existing value as the selected one
-                all_choices = [
-                    {
-                        'value': obj.pk,
-                        'label': str(obj),
-                        'selected': True if initial_data == obj.pk else False
-                    } 
-                    for index, obj in enumerate(field.remote_field.model.objects.all())
-                ]
+                if is_edit:
+                    # use the existing value as the selected one
+                    all_choices = [
+                        {
+                            'value': get_pk_or_id_value(obj),
+                            'label': str(obj),
+                            'selected': True if initial_data == get_pk_or_id_value(obj) else False
+                        } 
+                        for index, obj in enumerate(field.remote_field.model.objects.all())
+                    ]
+                else:
+                    all_choices = [
+                        {
+                            'value': get_pk_or_id_value(obj),
+                            'label': str(obj),
+                            'selected': False if index != 0 else True
+                        } 
+                        for index, obj in enumerate(field.remote_field.model.objects.all())
+                    ]
 
             field_names[field.name]['foreignkey_choices'] = all_choices
             field_names[field.name]['foreignkey_model'] = field.remote_field.model.__name__
             field_names[field.name]['foreignkey_app'] = field.remote_field.model._meta.app_label
 
-            if is_edit:
-                field_names[field.name]['foreignkey_string'] = field.remote_field.model.objects.get(pk=initial_data).__str__()
-            
+            related_model = field.remote_field.model
+            pk_field = get_pk_field(related_model)
+            field_names[field.name]['foreignkey_string'] = field.remote_field.model.objects.filter(**{
+                pk_field: initial_data
+            }).first().__str__()
+                
         try:
             for validator in field.validators:
                 if isinstance(validator, RegexValidator):

@@ -79,21 +79,37 @@ def test_get_model_fields_admin_not_found(api_client, limited_admin_token):
     )
     assert response.status_code == 404
 
-def test_get_model_admin_settings_non_admin(api_client, non_admin_token):
+def test_get_model_admin_settings_non_admin(api_client, non_admin_token, demo_model_instance):
     client = api_client()
 
     response = client.get(
-        reverse('get_model_admin_settings', kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel'}), 
+        reverse(
+            'get_model_admin_settings', 
+            kwargs={
+                'app_label': 
+                'django_admin_demo', 
+                'model_name': 'demomodel',
+                'pk': demo_model_instance.pk
+            }
+        ), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
     )
     assert response.status_code == 401
 
-def test_get_model_admin_settings_admin(api_client, limited_admin_token):
+def test_get_model_admin_settings_admin(api_client, limited_admin_token, demo_model_instance):
     client = api_client()
 
     response = client.get(
-        reverse('get_model_admin_settings', kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel'}), 
+        reverse(
+            'get_model_admin_settings', 
+            kwargs={
+                'app_label': 
+                'django_admin_demo', 
+                'model_name': 'demomodel',
+                'pk': demo_model_instance.pk
+            }
+        ), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
     )
@@ -137,11 +153,19 @@ def test_get_model_admin_settings_admin(api_client, limited_admin_token):
     assert 'func' in admin_settings.get('custom_actions')[0]
     assert 'label' in admin_settings.get('custom_actions')[0]
 
-def test_get_model_admin_settings_admin_not_found(api_client, limited_admin_token):
+def test_get_model_admin_settings_admin_not_found(api_client, limited_admin_token, demo_model_instance):
     client = api_client()
 
     response = client.get(
-        reverse('get_model_admin_settings', kwargs={'app_label': 'django_admin_demo', 'model_name': 'nothing'}), 
+        reverse(
+            'get_model_admin_settings', 
+            kwargs={
+                'app_label': 
+                'django_admin_demo', 
+                'model_name': 'nothing',
+                'pk': demo_model_instance.pk
+            }
+        ), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
     )
@@ -455,7 +479,7 @@ def test_custom_action_delete_non_admin(api_client, non_admin_token):
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW.value}
+            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
@@ -472,7 +496,7 @@ def test_custom_action_delete_admin_invalid_payload(api_client, superuser_token)
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW.value}
+            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
@@ -487,7 +511,7 @@ def test_custom_action_delete_admin_invalid_payload(api_client, superuser_token)
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW.value}
+            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
@@ -504,7 +528,7 @@ def test_custom_action_delete_admin_no_permission(api_client, limited_admin_toke
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW.value}
+            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
@@ -521,7 +545,7 @@ def test_custom_action_delete_admin_valid_delete(api_client, superuser_token):
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW.value}
+            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
