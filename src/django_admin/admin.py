@@ -42,6 +42,14 @@ class BaseModelAdmin(admin.ModelAdmin):
         Use this for all ModelAdmin classes.
         These are the supported model admin properties
     """
+    def __init__(self, model, admin_site, *args, **kwargs):
+        super().__init__(model, admin_site, *args, **kwargs)
+
+        # This is the parent object of the current page which is used in change forms
+        # This allows access for the BaseModelAdmin
+        # to the current object in the change / detail view
+        self.obj_instance = None
+
     list_per_page = LIST_PAGE_COUNT
     list_filter = []
     list_display = []
@@ -71,6 +79,18 @@ class BaseModelAdmin(admin.ModelAdmin):
 
     # Data is autopopulated when list_filter is not empty
     table_filters = []
+
+    def set_obj_instance(self, instance):
+        self.obj_instance = instance
+
+    # This is the source of inlines returned from getting a model admin settings data
+    # You can override this for dynamic generation of custom inlines
+    def get_custom_inlines(self):
+        return self.custom_inlines
+    
+    def set_custom_inlines(self, custom_inlines = []):
+        if custom_inlines:
+            self.custom_inlines = custom_inlines
 
 
 class CustomTabularInlineBase(type):

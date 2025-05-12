@@ -55,7 +55,7 @@ def serialize_model_admin(app_label: str, model: Model, model_admin: BaseModelAd
         'autocomplete_fields': model_admin.autocomplete_fields,
         'table_filters': model_admin.table_filters,
         'custom_inlines': AdminCustomInlineSerializer(
-            model_admin.custom_inlines,
+            model_admin.get_custom_inlines(),
             many=True
         ).data,
         'extra_inlines': model_admin.extra_inlines,

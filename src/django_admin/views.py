@@ -70,6 +70,7 @@ from .util_models import (
     get_converted_pk,
     get_model,
     get_model_fields_data,
+    get_pk_field,
     is_valid_modelfield_file,
 )
 from .util_serializers import (
@@ -204,10 +205,21 @@ def get_model_fields(request, app_label: str, model_name: str):
 )
 @api_view(['GET'])
 @permission_classes([IsActiveAdminUser])
-def get_model_admin_settings(request, app_label: str, model_name: str):
+def get_model_admin_settings(request, app_label: str, model_name: str, pk: str):
+    if pk.isdigit():
+        pk = int(pk)
+
     try:
         model = get_model(f'{app_label}.{model_name}')
         model_admin = admin.site._registry.get(model)
+        model_instance = None
+
+        if pk:
+            model_instance = model.objects.filter(pk=pk).first()
+
+        if model_instance:
+            model_admin.set_obj_instance(model_instance)
+        model_admin.set_custom_inlines()
         model_admin_settings = serialize_model_admin(app_label, model, model_admin)
 
         return Response({
@@ -243,14 +255,14 @@ def get_model_admin_settings(request, app_label: str, model_name: str):
 def get_model_fields_edit(request, app_label: str, model_name: str, pk: str):
     try:
         model = get_model(f'{app_label}.{model_name}')
-
         has_permission, response = has_user_permission(request, model, 'edit')
         if not has_permission:
             return response
 
         model_admin = admin.site._registry.get(model)
         model_admin_settings = serialize_model_admin(app_label, model, model_admin)
-        instance = model.objects.get(pk=pk)
+        pk_field = get_pk_field(model)
+        instance = model.objects.get(**{pk_field: pk})
         model_fields = get_model_fields_data(model, is_edit=True, instance=instance)
 
         return Response({
@@ -266,6 +278,7 @@ def get_model_fields_edit(request, app_label: str, model_name: str, pk: str):
         }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         log.error(f'An error of type {type(e).__name__} occurred: {e}')
+
         return Response({
             'fields': [],
             'model_admin_settings': {}
