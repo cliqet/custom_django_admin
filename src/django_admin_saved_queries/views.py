@@ -8,7 +8,6 @@ from django.db.models import QuerySet
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from django_admin.constants import CACHE_BY_DAY
@@ -53,7 +52,7 @@ log = logging.getLogger(__name__)
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsSuperUser])
 def query_builder(request):
     try:
         body = request.data
@@ -128,7 +127,7 @@ def query_builder(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAdminUser, IsSuperUser])
+@permission_classes([IsSuperUser])
 def raw_query(request):
     try:
         body = request.data

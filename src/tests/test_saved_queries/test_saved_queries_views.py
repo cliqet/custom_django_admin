@@ -58,7 +58,7 @@ def test_query_builder_non_admin(api_client, non_admin_token):
     assert response.status_code == 401
 
 
-def test_query_builder_invalid_body(api_client, limited_admin_token):
+def test_query_builder_invalid_body(api_client, superuser_token):
     client = api_client()
     data = {
         'invalid': 'body'
@@ -70,12 +70,11 @@ def test_query_builder_invalid_body(api_client, limited_admin_token):
         ),
         data=data,
         format='json',
-        **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
     )
     assert response.status_code == 400
 
-
-def test_query_builder_valid_body(api_client, limited_admin_token):
+def test_query_builder_non_superuser(api_client, limited_admin_token):
     client = api_client()
     data = {
         "app_name": "django_admin_demo",
@@ -101,6 +100,36 @@ def test_query_builder_valid_body(api_client, limited_admin_token):
         data=data,
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
+    )
+    assert response.status_code == 403
+
+
+def test_query_builder_valid_body(api_client, superuser_token):
+    client = api_client()
+    data = {
+        "app_name": "django_admin_demo",
+        "model_name": "DemoModel",
+        "conditions": [
+            [
+                "is_active", "equals", "True" 
+            ],
+            [
+                "ordering", "lt", "12" 
+            ]
+        ],
+        "orderings": [
+            "ordering"
+        ],
+        "query_limit": None
+    }
+
+    response = client.post(
+        reverse(
+            'query_builder', 
+        ),
+        data=data,
+        format='json',
+        **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
     )
     assert response.status_code == 202
     data = response.data
