@@ -8,13 +8,13 @@ from django_admin.data_transform import transform_dict_to_camel_case
 
 from .docs import GET_MODEL_DOCS_DOC
 from .models import ModelDocumentation
-from .serializers import ModelDocumentationSerializer
+from .serializers import AdminModelDocumentationSerializer
 
 
 @extend_schema(
     responses={
         status.HTTP_200_OK: OpenApiResponse(
-            response=ModelDocumentationSerializer,
+            response=AdminModelDocumentationSerializer,
             description=GET_MODEL_DOCS_DOC
         ),
     }
@@ -29,7 +29,7 @@ def get_model_docs(request):
     
     docs = ModelDocumentation.objects.all()
     serialized_docs = transform_dict_to_camel_case({
-        'docs': ModelDocumentationSerializer(docs, many=True).data
+        'docs': AdminModelDocumentationSerializer(docs, many=True).data
     })
 
     cache.set(cache_key, serialized_docs)
