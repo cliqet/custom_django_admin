@@ -17,21 +17,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
 from django_admin.decorators import has_model_permission
-from django_admin.permissions import IsActiveAdminUser, IsSuperUser, has_user_permission
-from services.cloudflare import verify_token
-from services.queue_service import (
-    delete_jobs,
-    get_failed_jobs,
-    get_job,
-    get_queue_list,
-    requeue_jobs,
-)
-
-from .actions import ACTIONS
-from .configuration import APP_LIST_CONFIG_OVERRIDE
-from .constants import DASHBOARD_URL_PREFIX, ModelField
-from .data_transform import transform_dict_to_camel_case
-from .docs import (
+from django_admin.docs.docs import (
     ADD_CHANGE_MODEL_RECORD_ERROR_DOC,
     ADD_MODEL_RECORD_DOC,
     CHANGE_MODEL_RECORD_DOC,
@@ -54,6 +40,20 @@ from .docs import (
     VERIFY_CLOUDFLARE_TOKEN_DOC,
     VERIFY_CLOUDFLARE_TOKEN_ERROR_DOC,
 )
+from django_admin.permissions import IsActiveAdminUser, IsSuperUser, has_user_permission
+from services.cloudflare import verify_token
+from services.queue_service import (
+    delete_jobs,
+    get_failed_jobs,
+    get_job,
+    get_queue_list,
+    requeue_jobs,
+)
+
+from .actions import ACTIONS
+from .configuration import APP_LIST_CONFIG_OVERRIDE
+from .constants import DASHBOARD_URL_PREFIX, ModelField
+from .data_transform import transform_dict_to_camel_case
 from .serializers import (
     AdminAppSerializer,
     AdminContentTypeSerializer,
@@ -66,18 +66,18 @@ from .serializers import (
     AdminRequeueOrDeleteJobsBodySerializer,
     AdminVerifyTokenBodySerializer,
 )
-from .util_models import (
+from .utils import serialize_model_admin
+from .utils_models import (
     get_converted_pk,
     get_model,
     get_model_fields_data,
     get_pk_field,
     is_valid_modelfield_file,
 )
-from .util_serializers import (
+from .utils_serializers import (
     create_post_body_model_serializer,
     get_dynamic_serializer,
 )
-from .utils import serialize_model_admin
 
 log = logging.getLogger(__name__)
 

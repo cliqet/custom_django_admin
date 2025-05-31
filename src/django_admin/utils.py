@@ -6,9 +6,10 @@ from django.db import models, transaction
 from django.db.models import ForeignKey, Max, Model
 from django.http.request import HttpRequest
 
-from .admin import BaseModelAdmin
-from .serializers import AdminCustomInlineSerializer
-from .util_models import get_model
+from django_admin.admin.admin_main import BaseModelAdmin
+from django_admin.serializers import AdminCustomInlineSerializer
+
+from .utils_models import get_model
 
 
 @dataclass

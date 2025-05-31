@@ -3,8 +3,8 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from backend.settings.base import IS_DEMO_MODE
-from django_admin.admin import CUSTOM_ACTIONS
-from django_admin.util_models import get_model
+from django_admin.admin.admin_main import CUSTOM_ACTIONS
+from django_admin.utils_models import get_model
 
 from .permissions import has_user_permission
 from .utils import copy_record

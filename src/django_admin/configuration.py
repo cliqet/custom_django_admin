@@ -3,11 +3,15 @@ from backend.settings.base import IS_DEMO_MODE
 from .constants import DASHBOARD_URL_PREFIX
 
 APP_LIST_CONFIG_OVERRIDE = {
-    'django_admin_saved_queries': {
-        'is_hidden': True,
-    },
-    'django_admin_demo': {
-        'is_hidden': True,
+    'django_admin': {
+        'models': {
+            'SavedQueryBuilder': {
+                'is_hidden': True
+            },
+            'SavedRawQuery': {
+                'is_hidden': True
+            }
+        }
     }
 }
 
@@ -34,7 +38,7 @@ APP_LIST_CONFIG_OVERRIDE = {
 if IS_DEMO_MODE:
     APP_LIST_CONFIG_OVERRIDE.update({
         # The name of the app
-        'django_admin_demo': {
+        'django_admin': {
             'app_url': f'{DASHBOARD_URL_PREFIX}/custom',
             'models': {
                 # The name of the model
@@ -44,6 +48,12 @@ if IS_DEMO_MODE:
                 },
                 'Level': {
                     'is_hidden': True  # hides the model from the app list
+                },
+                'SavedQueryBuilder': {
+                    'is_hidden': True
+                },
+                'SavedRawQuery': {
+                    'is_hidden': True
                 }
                 # You can add more models
             },

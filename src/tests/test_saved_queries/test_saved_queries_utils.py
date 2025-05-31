@@ -1,8 +1,8 @@
 from django.db.models import Q
 
-from django_admin.util_models import get_model_fields_data
-from django_admin_demo.models import DemoModel
-from django_admin_saved_queries.utils import (
+from django_admin.models_demo import DemoModel
+from django_admin.utils_models import get_model_fields_data
+from django_admin.utils_saved_queries import (
     build_conditions_query,
     transform_conditions_query,
 )

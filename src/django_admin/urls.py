@@ -23,6 +23,30 @@ from .views import (
     requeue_failed_jobs,
     verify_cloudflare_token,
 )
+from .views_documentation import get_model_docs
+from .views_saved_queries import (
+    add_query_builder,
+    add_raw_query,
+    change_query_builder,
+    change_raw_query,
+    delete_query_builder,
+    delete_raw_query,
+    get_all_query_builders,
+    get_all_raw_queries,
+    query_builder,
+    raw_query,
+)
+from .views_users import (
+    CustomTokenObtainPairView,
+    CustomTokenRefreshView,
+    get_all_users,
+    get_user_detail,
+    get_user_permissions,
+    logout,
+    reset_password_via_link,
+    send_password_reset_link,
+    verify_password_reset_link,
+)
 
 urlpatterns = [
     path('apps', get_apps, name='get_apps'),
@@ -46,4 +70,30 @@ urlpatterns = [
     path('worker-jobs/requeue', requeue_failed_jobs, name='requeue_failed_jobs'),
     path('worker-jobs/delete', delete_queued_jobs, name='delete_queued_jobs'),
     path('worker-jobs/<str:queue_name>/<str:job_id>', get_queued_job, name='get_queued_job'),
+
+    # documentation urls
+    path('model-docs', get_model_docs, name='get_model_docs'),
+
+    # saved_queries urls
+    path('saved-queries/query-builder/change/<int:id>', change_query_builder, name='change_query_builder'),
+    path('saved-queries/query-builder/delete/<int:id>', delete_query_builder, name='delete_query_builder'),
+    path('saved-queries/query-builder/add', add_query_builder, name='add_query_builder'),
+    path('saved-queries/query-builder/get-data', query_builder, name='query_builder'),
+    path('saved-queries/query-builder', get_all_query_builders, name='get_all_query_builders'),
+    path('saved-queries/raw-query/get-data', raw_query, name='raw_query'),
+    path('saved-queries/raw-query/change/<int:id>', change_raw_query, name='change_raw_query'),
+    path('saved-queries/raw-query/delete/<int:id>', delete_raw_query, name='delete_raw_query'),
+    path('saved-queries/raw-query/add', add_raw_query, name='add_raw_query'),
+    path('saved-queries/raw-query', get_all_raw_queries, name='get_all_raw_queries'),
+
+    # users urls
+    path('users/login', CustomTokenObtainPairView.as_view(), name='login'),
+    path('users/refresh-token', CustomTokenRefreshView.as_view(), name='refresh_token'),
+    path('users/logout', logout, name='logout'),
+    path('users/send-password-reset-link/<str:uid>', send_password_reset_link, name='send_password_reset_link'),
+    path('users/verify-password-reset-link/<str:uidb64>/<str:token>', verify_password_reset_link, name='verify_password_reset_link'),
+    path('users/reset-password-via-link/<str:uidb64>/<str:token>', reset_password_via_link, name='reset_password_via_link'),
+    path('users/permissions/<str:uid>', get_user_permissions, name='get_user_permissions'),
+    path('users/<str:uid>', get_user_detail, name='get_user_detail'),
+    path('users', get_all_users, name='get_all_users'),
 ]

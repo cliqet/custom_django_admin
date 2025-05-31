@@ -2,7 +2,8 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.base import ModelBase
 
-from django_admin.util_models import (
+from django_admin.models_demo import DemoModel
+from django_admin.utils_models import (
     _get_field_initial_data,
     _get_text_choices,
     _verbose_name_capitalize,
@@ -12,7 +13,6 @@ from django_admin.util_models import (
     get_model_fields_data,
     is_valid_modelfield_file,
 )
-from django_admin_demo.models import DemoModel
 
 
 def test_get_text_choices(demo_model_instance):
