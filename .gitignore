@@ -85,5 +85,4 @@ docker_media_vol/*
 
 # django_admin app
 src/django_admin/*
-!src/django_admin/.gitkeep
 
