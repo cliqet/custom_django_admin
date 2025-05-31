@@ -95,7 +95,6 @@ def get_model_fields_data(model: models.Model, is_edit: bool = False, instance =
         if not is_model_field(field):
             continue
         initial_data = _get_field_initial_data(field, is_edit, instance)
-        print('FIELD', field, 'with initial data', initial_data)
 
         if field.concrete:
             field_names[field.name] = {
