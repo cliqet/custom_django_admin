@@ -64,6 +64,9 @@ INSTALLED_APPS = [
 
     # user-defined apps
     'django_admin',
+
+    'products',
+    'accounts',
 ]
 
 AUTH_USER_MODEL = 'django_admin.CustomUser'

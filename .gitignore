@@ -85,4 +85,6 @@ docker_media_vol/*
 
 # django_admin app (separate repo)
 src/django_admin/
+src/accounts/
+src/products/
 
