@@ -36,7 +36,7 @@ def test_get_model_fields_non_admin(api_client, non_admin_token):
     client = api_client()
 
     response = client.get(
-        reverse('get_model_fields', kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel'}), 
+        reverse('get_model_fields', kwargs={'app_label': 'django_admin', 'model_name': 'demomodel'}), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
     )
@@ -46,7 +46,7 @@ def test_get_model_fields_admin(api_client, limited_admin_token):
     client = api_client()
 
     response = client.get(
-        reverse('get_model_fields', kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel'}), 
+        reverse('get_model_fields', kwargs={'app_label': 'django_admin', 'model_name': 'demomodel'}), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
     )
@@ -73,7 +73,7 @@ def test_get_model_fields_admin_not_found(api_client, limited_admin_token):
     client = api_client()
 
     response = client.get(
-        reverse('get_model_fields', kwargs={'app_label': 'django_admin_demo', 'model_name': 'nothing'}), 
+        reverse('get_model_fields', kwargs={'app_label': 'django_admin', 'model_name': 'nothing'}), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
     )
@@ -87,7 +87,7 @@ def test_get_model_admin_settings_non_admin(api_client, non_admin_token, demo_mo
             'get_model_admin_settings', 
             kwargs={
                 'app_label': 
-                'django_admin_demo', 
+                'django_admin', 
                 'model_name': 'demomodel',
                 'pk': demo_model_instance.pk
             }
@@ -105,7 +105,7 @@ def test_get_model_admin_settings_admin(api_client, limited_admin_token, demo_mo
             'get_model_admin_settings', 
             kwargs={
                 'app_label': 
-                'django_admin_demo', 
+                'django_admin', 
                 'model_name': 'demomodel',
                 'pk': demo_model_instance.pk
             }
@@ -161,7 +161,7 @@ def test_get_model_admin_settings_admin_not_found(api_client, limited_admin_toke
             'get_model_admin_settings', 
             kwargs={
                 'app_label': 
-                'django_admin_demo', 
+                'django_admin', 
                 'model_name': 'nothing',
                 'pk': demo_model_instance.pk
             }
@@ -177,7 +177,7 @@ def test_get_model_fields_edit_non_admin(api_client, non_admin_token, demo_model
     response = client.get(
         reverse(
             'get_model_fields_edit', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'pk': demo_model_instance.pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'pk': demo_model_instance.pk}
         ), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
@@ -190,7 +190,7 @@ def test_get_model_fields_edit_admin(api_client, superuser_token, demo_model_ins
     response = client.get(
         reverse(
             'get_model_fields_edit', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'pk': demo_model_instance.pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'pk': demo_model_instance.pk}
         ), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
@@ -223,7 +223,7 @@ def test_get_model_fields_edit_admin_not_found(api_client, superuser_token):
     response = client.get(
         reverse(
             'get_model_fields_edit', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'pk': 1000}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'pk': 1000}
         ), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
@@ -236,7 +236,7 @@ def test_get_model_fields_edit_admin_no_permission(api_client, limited_admin_tok
     response = client.get(
         reverse(
             'get_model_fields_edit', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'pk': 1000}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'pk': 1000}
         ), 
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
@@ -361,7 +361,7 @@ def test_get_model_record_non_admin(api_client, non_admin_token, demo_model_inst
     response = client.get(
         reverse(
             'get_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'pk': demo_model_instance.pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'pk': demo_model_instance.pk}
         ),
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
@@ -374,7 +374,7 @@ def test_get_model_record_admin(api_client, superuser_token, demo_model_instance
     response = client.get(
         reverse(
             'get_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'pk': demo_model_instance.pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'pk': demo_model_instance.pk}
         ),  
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
@@ -390,7 +390,7 @@ def test_get_model_listview_non_admin(api_client, non_admin_token):
     response = client.get(
         reverse(
             'get_model_listview', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel'}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel'}
         ),
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
@@ -403,7 +403,7 @@ def test_get_model_listview_admin(api_client, superuser_token):
     response = client.get(
         reverse(
             'get_model_listview', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel'}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel'}
         ),
         format='json',
         **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
@@ -436,7 +436,7 @@ def test_get_inline_listview_non_admin(api_client, non_admin_token, type_instanc
         f"{reverse(
             'get_inline_listview', 
             kwargs={
-                'parent_app_label': 'django_admin_demo', 
+                'parent_app_label': 'django_admin', 
                 'parent_model_name': 'type', 
                 'change_obj_pk': type_instances[0].pk
             }
@@ -454,7 +454,7 @@ def test_get_inline_listview_admin(api_client, superuser_token, type_instances):
         f"{reverse(
             'get_inline_listview', 
             kwargs={
-                'parent_app_label': 'django_admin_demo', 
+                'parent_app_label': 'django_admin', 
                 'parent_model_name': 'type', 
                 'change_obj_pk': type_instances[0].pk
             }
@@ -479,7 +479,7 @@ def test_custom_action_delete_non_admin(api_client, non_admin_token):
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
@@ -496,7 +496,7 @@ def test_custom_action_delete_admin_invalid_payload(api_client, superuser_token)
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
@@ -511,7 +511,7 @@ def test_custom_action_delete_admin_invalid_payload(api_client, superuser_token)
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
@@ -528,7 +528,7 @@ def test_custom_action_delete_admin_no_permission(api_client, limited_admin_toke
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
@@ -545,7 +545,7 @@ def test_custom_action_delete_admin_valid_delete(api_client, superuser_token):
     response = client.post(
         reverse(
             'custom_action_view', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
+            kwargs={'app_label': 'django_admin', 'model_name': 'demomodel', 'func': CUSTOM_ACTIONS.DELETE_LISTVIEW}
         ),
         data=data,
         format='json',
@@ -565,7 +565,7 @@ def test_add_model_record_non_admin(api_client, non_admin_token):
     response = client.post(
         reverse(
             'add_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'country'}
+            kwargs={'app_label': 'django_admin', 'model_name': 'country'}
         ),
         data=data,
         format='json',
@@ -582,7 +582,7 @@ def test_add_model_record_admin_no_permission(api_client, limited_admin_token):
     response = client.post(
         reverse(
             'add_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'country'}
+            kwargs={'app_label': 'django_admin', 'model_name': 'country'}
         ),
         data=data,
         format='json',
@@ -599,7 +599,7 @@ def test_add_model_record_admin_invalid_body(api_client, superuser_token):
     response = client.post(
         reverse(
             'add_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'country'}
+            kwargs={'app_label': 'django_admin', 'model_name': 'country'}
         ),
         data=data,
         format='json',
@@ -616,7 +616,7 @@ def test_add_model_record_admin_valid_body(api_client, superuser_token):
     response = client.post(
         reverse(
             'add_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'country'}
+            kwargs={'app_label': 'django_admin', 'model_name': 'country'}
         ),
         data=data,
         format='json',
@@ -633,7 +633,7 @@ def test_change_model_record_non_admin(api_client, non_admin_token, type_instanc
     response = client.post(
         reverse(
             'change_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'type', 'pk': type_instances[0].pk}
         ),
         data=data,
         format='json',
@@ -650,7 +650,7 @@ def test_change_model_record_admin_no_permission(api_client, limited_admin_token
     response = client.post(
         reverse(
             'change_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'type', 'pk': type_instances[0].pk}
         ),
         data=data,
         format='json',
@@ -668,7 +668,7 @@ def test_change_model_record_admin_invalid_body(api_client, superuser_token, typ
     response = client.post(
         reverse(
             'change_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'type', 'pk': type_instances[0].pk}
         ),
         data=data,
         format='json',
@@ -685,7 +685,7 @@ def test_change_model_record_admin_valid(api_client, superuser_token, type_insta
     response = client.post(
         reverse(
             'change_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'type', 'pk': type_instances[0].pk}
         ),
         data=data,
         format='json',
@@ -699,7 +699,7 @@ def test_delete_model_record_non_admin(api_client, non_admin_token, type_instanc
     response = client.delete(
         reverse(
             'delete_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'type', 'pk': type_instances[0].pk}
         ),
         **{'HTTP_AUTHORIZATION': f'Bearer {non_admin_token}'}
     )
@@ -711,7 +711,7 @@ def test_delete_model_record_admin_no_permission(api_client, limited_admin_token
     response = client.delete(
         reverse(
             'delete_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'type', 'pk': type_instances[0].pk}
         ),
         **{'HTTP_AUTHORIZATION': f'Bearer {limited_admin_token}'}
     )
@@ -723,7 +723,7 @@ def test_delete_model_record_admin_valid(api_client, superuser_token, type_insta
     response = client.delete(
         reverse(
             'delete_model_record', 
-            kwargs={'app_label': 'django_admin_demo', 'model_name': 'type', 'pk': type_instances[0].pk}
+            kwargs={'app_label': 'django_admin', 'model_name': 'type', 'pk': type_instances[0].pk}
         ),
         **{'HTTP_AUTHORIZATION': f'Bearer {superuser_token}'}
     )

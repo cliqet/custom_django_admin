@@ -2,7 +2,7 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.base import ModelBase
 
-from django_admin.models_demo import DemoModel
+from django_admin.models.models_demo import DemoModel
 from django_admin.utils_models import (
     _get_field_initial_data,
     _get_text_choices,
@@ -71,7 +71,7 @@ def test_get_model_fields_data(demo_model_instance):
     assert 'foreignkey_string' in data.get('type')
 
 def test_get_model():
-    model = get_model('django_admin_demo.demomodel')
+    model = get_model('django_admin.demomodel')
     assert isinstance(model, ModelBase)
 
 def test_build_filefield_helptext():

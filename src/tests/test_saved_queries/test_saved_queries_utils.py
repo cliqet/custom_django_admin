@@ -1,6 +1,6 @@
 from django.db.models import Q
 
-from django_admin.models_demo import DemoModel
+from django_admin.models.models_demo import DemoModel
 from django_admin.utils_models import get_model_fields_data
 from django_admin.utils_saved_queries import (
     build_conditions_query,

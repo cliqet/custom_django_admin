@@ -1,12 +1,12 @@
 import pytest
 from django.urls import reverse
 
-from django_admin.models_saved_queries import SavedQueryBuilder, SavedRawQuery
+from django_admin.models.models_saved_queries import SavedQueryBuilder, SavedRawQuery
 
 data = {
     'name': 'myquery',
     "query": {
-        "app_name": "django_admin_demo",
+        "app_name": "django_admin",
         "model_name": "DemoModel",
         "conditions": [
             [
@@ -25,7 +25,7 @@ data = {
 
 raw_query_data = {
     'name': 'myquery',
-    'query': 'select * from django_admin_demo_demomodel;'
+    'query': 'select * from django_admin_demomodel;'
 }
 
 @pytest.fixture
@@ -77,7 +77,7 @@ def test_query_builder_invalid_body(api_client, superuser_token):
 def test_query_builder_non_superuser(api_client, limited_admin_token):
     client = api_client()
     data = {
-        "app_name": "django_admin_demo",
+        "app_name": "django_admin",
         "model_name": "DemoModel",
         "conditions": [
             [
@@ -107,7 +107,7 @@ def test_query_builder_non_superuser(api_client, limited_admin_token):
 def test_query_builder_valid_body(api_client, superuser_token):
     client = api_client()
     data = {
-        "app_name": "django_admin_demo",
+        "app_name": "django_admin",
         "model_name": "DemoModel",
         "conditions": [
             [

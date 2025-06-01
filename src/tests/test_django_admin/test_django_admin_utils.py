@@ -17,7 +17,7 @@ def test_organize_permissions(superuser):
     user_permissions = get_user_unique_permissions(superuser)
     serialized_permissions = AdminPermissionSerializer(user_permissions, many=True).data
     permissions = organize_permissions(serialized_permissions, superuser)
-    demo_model_permissions = permissions.get('django_admin_demo').get('demomodel')
+    demo_model_permissions = permissions.get('django_admin').get('demomodel')
     
     assert 'perms_ids' in demo_model_permissions
     assert len(demo_model_permissions.get('perms_ids')) == 4
