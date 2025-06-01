@@ -1,0 +1,1 @@
+DASHBOARD_URL_PREFIX = '/dashboard'
