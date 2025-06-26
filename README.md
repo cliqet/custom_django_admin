@@ -6,7 +6,7 @@
  the frontend side.
 
 ### Latest Version
-version-2.0.0
+version-3.0.0
 
 ### Frontend for Custom Django Admin
 - [SolidJS](https://github.com/cliqet/solidjs_django_admin) (match the right version)
@@ -23,7 +23,8 @@ version-2.0.0
 - `SMTP2GO`: For email services. Make sure you have an API key. If you want a different provider, you can change the implementation. Feel free to customize and redesign the email templates used.
 
 ### Before starting
-There is a current app registered named demo which you can use to see how the backend works. It has a model `DemoModel` that has all the fields that are supported and will give you a feel as to how to setup those fields. When you are about to start a project, just delete the demo folder and remove it from installed apps.
+Starting from `version-3.0.0`, the app `django_admin` is now a separate repo. This allows updates to `django_admin` which you can pull anytime without affecting what you have already done with the initial project.
+For initial setup, you need to create a directory named `django_admin` under `src` directory and clone the django_admin repo.
 
 ### Setting up the application in your local environment 
 - Navigate to the `src` directory and install dependencies by running
@@ -134,13 +135,13 @@ To learn more about the apis your frontend can consume, go to
 ### How to Use
 
 ### View existing demo apps and models
-You can view all models under the django_admin_demo by setting the config `is_demo_mode` to `true`. You only need to set this to `false` and it will not show in the current admin. You may delete this app and models but take note that all tests use this so make sure to adjust the tests or completely delete the existing tests.
+You can view all models under the django_admin_demo by setting the config `is_demo_mode` to `true`. You only need to set this to `false` and it will not show in the current admin. 
 
 #### Creating a model and register in admin
 We will use the demo app as our guide. First, create your model
 ```python
 class DemoModel(BaseModel):
-    admin_serializer_classname = 'DemoModelSerializer'
+    admin_serializer = 'django_admin.serializers_demo.AdminDemoModelSerializer'
 
     class ColorChoices(models.TextChoices):
         BLUE = ('Blue', 'Blue')
@@ -200,12 +201,11 @@ class DemoModel(BaseModel):
 It inherits from `BaseModel`. Use this so that you do not need to add 
 `created_at` and `updated_at` fields. 
 
-All your models should have an `admin_serializer_classname` property and must have 
-the corresponding serializer class defined in the `serializers.py` in the 
-same app directory in order to dynamically serialize any model. Use the `AdminBaseModelSerializer`. Separate your admin serializers with your frontend facing website. Look at `django_admin_demo.admin` and `django_admin_demo.serializers` for examples.
+All your models should have an `admin_serializer` property and must have 
+the path to the serializer class which should inherit from `AdminBaseModelSerializer`. Separate your admin serializers with your frontend facing website. Look at `django_admin.admin.admin_demo` and `django_admin.serializers_demo` for examples.
 
 ```python
-class DemoModelSerializer(AdminBaseModelSerializer):
+class AdminDemoModelSerializer(AdminBaseModelSerializer):
     class Meta:
         model = DemoModel
         fields = '__all__'
@@ -223,8 +223,7 @@ your model will now be available on the frontend with its corresponding
 add, change and listview pages.
 
 #### Model Fields 
-For the list of all fields supported, you can view it at `create_post_body_model_serializer` 
-in `django_admin.util_serializers`. Things to note about some fields:
+For the list of all fields supported, you can view it at `django_admin.constants.ModelField`. Things to note about some fields:
 - Setting `blank` to True will remove required validation on the frontend
 - Use `validators` property to apply custom validation rules to fields
 - Use `build_filefield_helptext` to create your help text for file and image fields 
@@ -251,7 +250,7 @@ class TypeAdmin(BaseModelAdmin):
 ```
 
 Notice that all  properties are just like in `admin.ModelAdmin` except 
-for `custom_inlines`, `extra_inlines`, `custom_change_link` and `custom_actions`
+for `custom_inlines`, `extra_inlines`, `custom_change_link`, `table_filters`, `table_header` and `custom_actions`
 
 1. `custom_inlines`: This is just like inlines except that it takes a special kind 
 of tabularinline model `BaseCustomInline` which you need to inherit from when creating 
@@ -305,6 +304,9 @@ custom_actions = [{
 The dict should have the `func` which is the identifier of the action and a `label` which is the one shown in the dropdown menu. You would need to provide a view if you would like to add more custom actions. Just follow the pattern used by the delete listview builtin function. Refer to `django_admin.actions` for more details.
 There is a utility function `copy_record` that can dynamically copy records including related instances and handles recursive instances such as foreign keys to self. Refer to copy demo model action for how to use it to add copy actions to your models.
 
+5. `table_filters` - Instead
+
+6. `table_header` - A string that is the name of a custom component that should be rendered above the table. Refer to DemoModelAdmin example and how it was used in the frontend in `src/components/inline_table_headers`.
 
 ### Documenting the admin site
 The documentation app provides a way to write documentation about the different models
@@ -313,11 +315,11 @@ created for a specific model, it will be accessible on the frontend under `/mode
 
 ### Customizing the app list
 Sometimes, you may want to have a specific add, listview or change forms for a specific model.
-This is possible through configuring `django_admin.configuration` as shown below
+This is possible through configuring `backend.settings.app_list` as shown below
 ```python
 APP_LIST_CONFIG_OVERRIDE = {
     # The name of the app
-    'demo': {
+    'django_admin': {
         'app_url': f'{DASHBOARD_URL_PREFIX}/custom',
         'models': {
             # The name of the model
@@ -339,6 +341,6 @@ This also includes `django-rq` as it's current task queue worker which is used c
 Allows you to query the db based using a GUI query builder or using raw SQL. Default permission is for superusers only. Queries can be saved.
 
 ### Other customizations
-Set your preferred `DASHBOARD_URL_PREFIX` in django_admin.constants. You can also just 
+Set your preferred `DASHBOARD_URL_PREFIX` in `backend.settings.constants`. You can also just 
 build your own views and not use the generic views. This means you can also change the routes 
 in the frontend and build your own components if you wish to. 
