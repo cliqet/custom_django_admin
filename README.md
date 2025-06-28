@@ -304,9 +304,14 @@ custom_actions = [{
 The dict should have the `func` which is the identifier of the action and a `label` which is the one shown in the dropdown menu. You would need to provide a view if you would like to add more custom actions. Just follow the pattern used by the delete listview builtin function. Refer to `django_admin.actions` for more details.
 There is a utility function `copy_record` that can dynamically copy records including related instances and handles recursive instances such as foreign keys to self. Refer to copy demo model action for how to use it to add copy actions to your models.
 
-5. `table_filters` - Instead
+5. `table_filters` - This is something that is auto-populated based on `list_filter` values so you do not need to do anything with this. This is responsible for showing display names on filters and what values need to be passed when filtering
 
-6. `table_header` - A string that is the name of a custom component that should be rendered above the table. Refer to DemoModelAdmin example and how it was used in the frontend in `src/components/inline_table_headers`.
+6. `table_header` - An optional string that is the name of a custom component that should be rendered above the table. Refer to DemoModelAdmin example and how it was used in the frontend in `src/components/inline_table_headers`.
+
+### Other special properties and methods of the BaseModelAdmin
+1. `obj_instance` - This is an instance property that allows you to have access to the current parent object in the admin forms. This is set whenever model admin settings data is retrieved.
+
+2. `set_custom_inlines(self, custom_inlines = [])` - This method allows you to create dynamic custom inlines. A good use for this is creating different inlines based on the current `obj_instance`. Example is creating a custom function in your BaseModelAdmin class which generates different inlines based on what the current obj_instance is.
 
 ### Documenting the admin site
 The documentation app provides a way to write documentation about the different models
