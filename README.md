@@ -23,7 +23,7 @@ version-3.0.0
 - `SMTP2GO`: For email services. Make sure you have an API key. If you want a different provider, you can change the implementation. Feel free to customize and redesign the email templates used.
 
 ### Before starting
-Starting from `version-3.0.0`, the app `django_admin` is now a separate repo. This allows updates to `django_admin` which you can pull anytime without affecting what you have already done with the initial project.
+Starting from `version-3.0.0`, the app [django_admin](https://github.com/cliqet/django_admin) is now a separate repo. This allows updates to `django_admin` which you can pull anytime without affecting what you have already done with the initial project.
 For initial setup, you need to create a directory named `django_admin` under `src` directory and clone the django_admin repo.
 
 ### Setting up the application in your local environment 
